@@ -4,9 +4,11 @@ const router = express.Router();
 
 // Post route for creating a new event - POST /events
 router.post("/", async (req, res) => {
+  // Destructure data from request body
   const { event_name, description, organizer_name, organizer_email } = req.body;
 
-  if (!event_name || !description || !organizer_name || organizer_email) {
+  // Input validation
+  if (!event_name || !description || !organizer_name || !organizer_email) {
     return res
       .status(400)
       .json({ error: "All fields required to create an event" });
@@ -24,3 +26,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+
+// GET route to fetch an event by ID - GET /events/:id
+
