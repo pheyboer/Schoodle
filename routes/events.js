@@ -62,3 +62,32 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 });
+
+// PUT route for updating event details
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { event_name, description, organizer_name, organizer_email } = req.body;
+
+  // Input validation
+  if (!event_name || !description || !organizer_name || !organizer_email) {
+    return res.status(400).json({ error: "All fields needed to update event." });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE events SET event_name = $1, description = $2, organizer_name = $3, organizer_email = $4 WHERE event_id = $5 RETURNING *",
+      [event_name, description, organizer_name, organizer_email, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Event not found." });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error Updating Event", error);
+    res.status(500).json({ error: "There has been a server error" });
+  }
+});
+
+module.exports = router;
