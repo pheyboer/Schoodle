@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET route to get time slot by its ID
+// GET route to get time slot by its ID - GET /time_slots/:id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -64,5 +64,33 @@ router.get("/:eventId", async (req, res) => {
   } catch (error) {
     console.error("Error fetching time slots", error);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+// PUT route to update time slot - PUT /time_slots/:id
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { start_time, end_time } = req.body;
+
+  if (!start_time || !end_time) {
+    return res
+      .status(400)
+      .json({ error: "Start and End time required to update" });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE time_slots SET start_time = $1, end_time = $2 WHERE time_slot_id = $3 RETURNING *",
+      [start_time, end_time, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Time slot not found" });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error updating time slot", error);
+    res.status(500).json({ error: "Server Error" });
   }
 });
