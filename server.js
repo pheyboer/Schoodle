@@ -5,6 +5,7 @@ require('dotenv').config();
 const sassMiddleware = require('./lib/sass-middleware');
 const express = require('express');
 const morgan = require('morgan');
+const db = require('./connection');  // Import the database connection
 
 const PORT = process.env.PORT || 8080;
 const app = express();
