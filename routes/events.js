@@ -46,3 +46,19 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: "Unfortunate Server Error" });
   }
 });
+
+// GET route to fetch all events
+router.get("/", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM events");
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Sorry, event not found." });
+    }
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error fetching events", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
