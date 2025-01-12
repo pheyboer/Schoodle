@@ -45,3 +45,24 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 });
+
+// GET route for fetching time slots for event /time_slots/:eventId
+router.get("/:eventId", async (req, res) => {
+  const { eventId } = req.params;
+
+  try {
+    const result = await db.query(
+      "SELECT * FROM time_slots WHERE event_id = $1",
+      [eventId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "No time slot for this event" });
+    }
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error fetching time slots", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
