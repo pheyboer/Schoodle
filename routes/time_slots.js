@@ -24,3 +24,24 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 });
+
+// GET route to get time slots by event
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await db.query(
+      "SELECT * FROM time_slots WHERE time_slot_id = $1",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Time slot not found" });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error fetching time slot", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
