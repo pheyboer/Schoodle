@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET route to get time slots by event
+// GET route to get time slot by its ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
