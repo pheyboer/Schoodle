@@ -27,6 +27,22 @@ router.post("/", async (req, res) => {
   }
 });
 
-
 // GET route to fetch an event by ID - GET /events/:id
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
 
+  try {
+    const result = await db.query("SELECT * FROM events WHERE event_id = $1", [
+      id,
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Sorry, event not found." });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error getting event:", error);
+    res.status(500).json({ error: "Unfortunate Server Error" });
+  }
+});
