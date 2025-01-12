@@ -1,3 +1,6 @@
+// Load variables from .env file
+require('dotenv').config();
+
 // PG database client/connection setup
 const { Pool } = require('pg');
 
