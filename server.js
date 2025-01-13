@@ -32,6 +32,8 @@ app.use(express.static("public"));
 const userApiRoutes = require("./routes/users-api");
 const widgetApiRoutes = require("./routes/widgets-api");
 const usersRoutes = require("./routes/users");
+const eventsApiRoutes = require("./routes/events"); // Event API route
+const timeSlotApiRoutes = require("./routes/time_slots"); // Time slot API route
 
 // Mount all resource routes
 // Note: Feel free to replace the example routes below with your own
@@ -40,6 +42,8 @@ app.use("/api/users", userApiRoutes);
 app.use("/api/widgets", widgetApiRoutes);
 app.use("/users", usersRoutes);
 // Note: mount other resources here, using the same pattern above
+app.use("/api/time_slots", timeSlotApiRoutes);
+app.use("/api/events", eventsApiRoutes);
 
 // Home page
 // Warning: avoid creating more routes in this file!

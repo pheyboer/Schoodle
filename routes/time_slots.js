@@ -94,3 +94,24 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 });
+
+// DELETE route to delete time slot by ID
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await db.query(
+      "DELETE FROM time_slots WHERE time_slot_id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: "Time slot not found" });
+    }
+
+    res.status(200).json({ message: "Time slot deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting time slot", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
