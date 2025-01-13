@@ -34,6 +34,7 @@ const widgetApiRoutes = require("./routes/widgets-api");
 const usersRoutes = require("./routes/users");
 const eventsApiRoutes = require("./routes/events"); // Event API route
 const timeSlotApiRoutes = require("./routes/time_slots"); // Time slot API route
+const attendeeRoutes = require("./routes/attendees"); // Attendee API route
 
 // Mount all resource routes
 // Note: Feel free to replace the example routes below with your own
@@ -44,6 +45,7 @@ app.use("/users", usersRoutes);
 // Note: mount other resources here, using the same pattern above
 app.use("/api/time_slots", timeSlotApiRoutes);
 app.use("/api/events", eventsApiRoutes);
+app.use("/api/attendees", attendeeRoutes);
 
 // Home page
 // Warning: avoid creating more routes in this file!
