@@ -45,7 +45,7 @@ app.use("/users", usersRoutes);
 // Note: mount other resources here, using the same pattern above
 app.use("/api/time_slots", timeSlotApiRoutes);
 app.use("/api/events", eventsApiRoutes);
-app.use("/attendees", attendeeRoutes);
+app.use("/api/attendees", attendeeRoutes);
 
 // Home page
 // Warning: avoid creating more routes in this file!
