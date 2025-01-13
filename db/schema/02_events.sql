@@ -1,4 +1,6 @@
-CREATE TABLE public.events (
+DROP TABLE IF EXISTS events CASCADE;
+
+CREATE TABLE events (
     event_id SERIAL PRIMARY KEY,
     event_name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
