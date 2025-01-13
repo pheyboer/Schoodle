@@ -1,5 +1,5 @@
 const express = require("express");
-const db = require("../connection");
+const db = require('../db/connection');
 const router = express.Router();
 
 // Post route for creating a new event - POST /events

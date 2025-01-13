@@ -1,5 +1,5 @@
 const express = require("express");
-const db = require("../connection");
+const db = require('../db/connection');
 const router = express.Router();
 
 // POST route  for creating a new time slot for an event /time_slots
@@ -115,3 +115,5 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 });
+
+module.exports = router;
