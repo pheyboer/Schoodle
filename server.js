@@ -35,6 +35,7 @@ const usersRoutes = require("./routes/users");
 const eventsApiRoutes = require("./routes/events"); // Event API route
 const timeSlotApiRoutes = require("./routes/time_slots"); // Time slot API route
 const attendeeRoutes = require("./routes/attendees"); // Attendee API route
+const availabilityResponseRoutes = require("./routes/availability_responses"); // Availability response API
 
 // Mount all resource routes
 // Note: Feel free to replace the example routes below with your own
@@ -46,6 +47,7 @@ app.use("/users", usersRoutes);
 app.use("/api/time_slots", timeSlotApiRoutes);
 app.use("/api/events", eventsApiRoutes);
 app.use("/api/attendees", attendeeRoutes);
+app.use("/availability_responses", availabilityResponseRoutes);
 
 // Home page
 // Warning: avoid creating more routes in this file!
