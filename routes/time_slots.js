@@ -47,7 +47,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // GET route for fetching time slots for event /time_slots/:eventId
-router.get("/:eventId", async (req, res) => {
+router.get("/event/:eventId", async (req, res) => {
   const { eventId } = req.params;
 
   try {
