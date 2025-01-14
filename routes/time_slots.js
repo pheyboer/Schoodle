@@ -1,6 +1,12 @@
 const express = require("express");
 const db = require('../db/connection');
 const router = express.Router();
+const moment = require('moment'); // Time formatting
+
+// Installed moment.js to format time - Helper Function
+function formatTime(date) {
+  return moment(date).format('h:mm A')
+}
 
 // POST route  for creating a new time slot for an event /time_slots
 router.post("/", async (req, res) => {
@@ -39,7 +45,13 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ error: "Time slot not found" });
     }
 
-    res.status(200).json(result.rows[0]);
+    const timeSlot = result.rows[0];
+
+    // Formatting Time
+    timeSlot.start_time = formatTime(timeSlot.start_time);
+    timeSlot.end_time = formatTime(timeSlot.end_time);
+
+    res.status(200).json(timeSlot);
   } catch (error) {
     console.error("Error fetching time slot", error);
     res.status(500).json({ error: "Server Error" });
@@ -60,7 +72,17 @@ router.get("/event/:eventId", async (req, res) => {
       return res.status(404).json({ error: "No time slot for this event" });
     }
 
-    res.status(200).json(result.rows);
+    // Formatting of time slots
+    const formattedTimeSlots = result.rows.map((slot) => {
+      return {
+        time_slot_id: slot.time_slot_id,
+        event_id: slot.event_id,
+        start_time: formatTime(slot.start_time),
+        end_time: formatTime(slot.end_time),
+      };
+    });
+
+    res.status(200).json(formattedTimeSlots);
   } catch (error) {
     console.error("Error fetching time slots", error);
     res.status(500).json({ error: "Server error" });
