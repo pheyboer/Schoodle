@@ -17,6 +17,7 @@ app.set("view engine", "ejs");
 //         The :status token will be colored red for server error codes, yellow for client error codes, cyan for redirection codes, and uncolored for all other codes.
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(
   "/styles",
   sassMiddleware({
@@ -44,9 +45,9 @@ app.use("/api/users", userApiRoutes);
 app.use("/api/widgets", widgetApiRoutes);
 app.use("/users", usersRoutes);
 // Note: mount other resources here, using the same pattern above
-app.use("/api/time_slots", timeSlotApiRoutes);
-app.use("/api/events", eventsApiRoutes);
-app.use("/api/attendees", attendeeRoutes);
+app.use("/time_slots", timeSlotApiRoutes);
+app.use("/events", eventsApiRoutes);
+app.use("/attendees", attendeeRoutes);
 app.use("/availability_responses", availabilityResponseRoutes);
 
 // Home page
