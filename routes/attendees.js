@@ -5,6 +5,7 @@ const db = require('../db/connection');
 
 // POST route to create new attendee POST /attendees
 router.post("/", async (req, res) => {
+  console.log(req.body);
   const { event_id, name, email } = req.body;
 
   // Input validation
@@ -14,7 +15,7 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await db.query(
-      "INSERT INTO attendees (event_id, name, email) VALUES $1, $2, $3 RETURNING *",
+      "INSERT INTO attendees (event_id, name, email) VALUES ($1, $2, $3) RETURNING *",
       [event_id, name, email]
     );
     const newAttendee = result.rows[0];
