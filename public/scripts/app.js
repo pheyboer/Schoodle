@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
    // render event dynamically
-   const renderEvent = (event) => { 
+   const renderEvent = (event) => {
     const eventList = document.getElementById('event-list');
     const eventItem = document.createElement('div');
     eventItem.classList.add('event-item');
@@ -109,6 +109,25 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     eventList.appendChild(eventItem);
   };
+
+// fetch all events and display on same page
+const fetchAndDisplayEvents = async () => { 
+  try {
+    const response = await fetch('/events');
+    if (response.ok) {
+      const events = await response.json();
+      if (events.length === 0) {
+        document.getElementById('event-list').innerHTML = '<p>No events available. Create one above!</p>'; // FIXED
+      } else {
+        events.forEach((event) => renderEvent(event));
+      }
+    } else {
+      console.error('Failed to fetch events:', await response.text());
+    }
+  } catch (error) {
+    console.error('Error fetching events:', error);
+  }
+};
 
   // Fetch Event Details 
   const fetchEventDetails = async (eventId) => {
