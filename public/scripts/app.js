@@ -136,11 +136,11 @@ const fetchAndDisplayEvents = async () => {
       if (response.ok) {
         const eventData = await response.json();
 
-        
+        // display event details
         document.getElementById('event-name-display').textContent = eventData.name;
         document.getElementById('event-description-display').textContent = eventData.description;
 
-      
+      // display attendee details
         attendeesList.innerHTML = '';
         for (const attendee of eventData.attendees) {
           const listItem = document.createElement('li');
@@ -156,18 +156,18 @@ const fetchAndDisplayEvents = async () => {
   };
 
   // Fetch event details for a specific event 
-  fetchEventDetails('example-event-id');
+  fetchAndDisplayEvents();
 
   // Attendee Form Submission
   attendeeForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const attendeeName = document.getElementById('attendee-name').value;
+    const attendeeName = document.getElementById('attendee-name').value.trim();
     const timeSlots = Array.from(
       document.querySelectorAll('input[name="time-slot"]:checked')
     ).map((checkbox) => checkbox.value);
 
-    if (!attendeeName.trim() || timeSlots.length === 0) {
+    if (!attendeeName || timeSlots.length === 0) {
       alert('Please provide your name and select at least one time slot.');
       return;
     }
@@ -183,7 +183,8 @@ const fetchAndDisplayEvents = async () => {
         alert('Availability submitted successfully!');
         attendeeForm.reset();
       } else {
-        console.error('Error submitting availability:', await response.text());
+        const errorText = await response.text();
+        console.error('Error submitting availability:', errorText);
         alert('Failed to submit availability. Please try again.');
       }
     } catch (error) {
