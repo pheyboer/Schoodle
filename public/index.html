@@ -35,12 +35,16 @@
         <label for="event-description">Description:</label>
         <textarea id="event-description" name="event-description" required></textarea>
 
-        <label for="event-time-slots">Time Slots (comma-separated):</label>
-        <input type="text" id="event-time-slots" name="event-time-slots" placeholder="e.g., 9-10am, 10-11am" required>
+        <label for="event-time-slots">Time Slots:</label>
+        <div id="time-slot-container">
+          <label><input type="checkbox" name="event-time-slot" value="9:00-10:00"> 9:00 AM - 10:00 AM</label>
+          <label><input type="checkbox" name="event-time-slot" value="10:00-11:00"> 10:00 AM - 11:00 AM</label>
+          <!-- Add time slots dynamically -->
+        </div>
 
         <button type="submit">Create Event</button>
       </form>
-      <div id="success-message" style="display: none;">Event created successfully!</div>
+      <div id="success-message" style="display: none;" aria-live="polite">Event created successfully!</div>
     </section>
 
     <!-- Event Details part -->
