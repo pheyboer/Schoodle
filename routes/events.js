@@ -8,7 +8,7 @@ router.post("/", async (req, res) => {
   const { name, description, timeSlots } = req.body;
 
   // Input validation
-  if (!event_name || !description || !organizer_name || !organizer_email) {
+  if (!name || !description || !timeSlots) {
     return res
       .status(400)
       .json({ error: "All fields required to create an event" });
