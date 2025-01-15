@@ -29,7 +29,8 @@
       <h2>Create an Event</h2>
       <form id="event-form">
         <label for="event-name">Event Name:</label>
-        <input type="text" id="event-name" name="event-name" required>
+
+        <input type="text" id="event-name" name="event-name" aria-label ="Event Name" required>
 
         <label for="event-description">Description:</label>
         <textarea id="event-description" name="event-description" required></textarea>
@@ -77,6 +78,9 @@
   </footer>
 
   <!-- JavaScript file link-->
+
+  <script src="/scripts/users.js"></script>
+
   <script src="/scripts/app.js"></script>
 </body>
 </html>
