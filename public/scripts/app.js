@@ -56,9 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Collect form data
-    const eventName = document.getElementById('event-name').value;
-    const eventDescription = document.getElementById('event-description').value;
-    const timeSlots = document.getElementById('event-time-slots').value;
+    const eventName = document.getElementById('event-name').value.trim();
+    const eventDescription = document.getElementById('event-description').value.trim();
+    const timeSlots = document.getElementById('event-time-slots').value.trim();
 
     // Send data to backend
     try {
