@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Form validation
   const validateForm = () => {
-    const eventName = document.getElementById('event-name').value;
-    const eventDescription = document.getElementById('event-description').value;
-    const timeSlots = document.getElementById('event-time-slots').value;
+    const eventName = document.getElementById('event-name').value.trim;
+    const eventDescription = document.getElementById('event-description').value.trim;
+    const timeSlots = document.getElementById('event-time-slots').value.trim;
 
     // Field validation form
     if (!eventName.trim() || !eventDescription.trim() || !timeSlots.trim()) {
