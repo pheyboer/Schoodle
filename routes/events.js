@@ -5,7 +5,7 @@ const router = express.Router();
 // Post route for creating a new event - POST /events
 router.post("/", async (req, res) => {
   // Destructure data from request body
-  const { event_name, description, organizer_name, organizer_email } = req.body;
+  const { name, description, timeSlots } = req.body;
 
   // Input validation
   if (!event_name || !description || !organizer_name || !organizer_email) {
