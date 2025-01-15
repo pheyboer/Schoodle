@@ -8,9 +8,17 @@ const successMessage = document.getElementById('success-message');
     event.preventDefault();
 
     // form data collection
+    const validateForm = () => {
  const eventName = document.getElementById('event-name').value;
   const eventDescription = document.getElementById('event-description').value;
     const timeSlots = document.getElementById('event-time-slots').value;
+
+    if (!eventName.trim() || !eventDescription.trim() || !timeSlots.trim()) {
+      alert('All fields are required.');
+      return false;
+    }
+    return true;
+  };
 
     // send data to backend
     try {
@@ -23,6 +31,23 @@ const successMessage = document.getElementById('success-message');
           timeSlots,
         }), 
       });
+
+      // error message for forms
+      const validateForm = () => {
+        if (!eventName.trim() || !eventDescription.trim() || !timeSlots.trim()) {
+          alert('All fields are required.');
+          return false;
+        }
+        return true;
+      };
+      
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!validateForm()) return;
+      
+        
+      });
+      
 
       if (response.ok) {
         successMessage.style.display = 'block'; 
