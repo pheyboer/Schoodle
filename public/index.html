@@ -21,7 +21,7 @@
       </ul>
     </nav>
   </header>
-  
+
   <!-- Main Content -->
   <main>
     <!-- Event Creation Form -->
@@ -29,25 +29,29 @@
       <h2>Create an Event</h2>
       <form id="event-form">
         <label for="event-name">Event Name:</label>
+
         <input type="text" id="event-name" name="event-name" aria-label ="Event Name" required>
-        
+
         <label for="event-description">Description:</label>
         <textarea id="event-description" name="event-description" required></textarea>
-        
+
         <label for="event-time-slots">Time Slots (comma-separated):</label>
         <input type="text" id="event-time-slots" name="event-time-slots" placeholder="e.g., 9-10am, 10-11am" required>
-        
+
         <button type="submit">Create Event</button>
       </form>
       <div id="success-message" style="display: none;">Event created successfully!</div>
     </section>
 
+<<<<<<< HEAD
     <section id="users-section">
       <h2>Users</h2>
       <button id="fetch-users">Fetch Users</button>
       <ul id="users"></ul>
     </section>
   
+=======
+>>>>>>> 12f5cba02ca7218c8fd31ab169d166a9791a65b6
     <!-- Event Details part -->
     <section id="event-details">
       <h2>Event Details</h2>
@@ -57,33 +61,35 @@
         <ul id="attendees-list"></ul>
       </div>
     </section>
-    
+
     <!-- Attendee Availability form -->
     <section id="attendee-form">
       <h2>Submit Availability</h2>
       <form id="availability-form">
         <label for="attendee-name">Your Name:</label>
         <input type="text" id="attendee-name" name="attendee-name" required>
-        
+
         <fieldset>
           <legend>Available Time Slots:</legend>
           <label><input type="checkbox" name="time-slot" value="9-10am"> 9:00 AM - 10:00 AM</label>
           <label><input type="checkbox" name="time-slot" value="10-11am"> 10:00 AM - 11:00 AM</label>
           <!-- adding more slots -->
         </fieldset>
-        
+
         <button type="submit">Submit</button>
       </form>
     </section>
   </main>
-  
+
   <!-- Footer -->
   <footer>
     <p>Schoodle &copy; 2025</p>
   </footer>
 
   <!-- JavaScript file link-->
-  <script src="app.js"></script>
-  <script src="users.js"></script>
+
+  <script src="/scripts/users.js"></script>
+
+  <script src="/scripts/app.js"></script>
 </body>
 </html>
