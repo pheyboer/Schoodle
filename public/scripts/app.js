@@ -2,6 +2,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('event-form');
   const successMessage = document.getElementById('success-message');
+  const attendeeForm = document.getElementById('availability-form');
+  const attendeesList = document.getElementById('attendees-list');
 
   // form validation 
   const validateForm = () => {
