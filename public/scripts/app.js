@@ -1,26 +1,37 @@
 // Client facing scripts here
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('event-form');
-const successMessage = document.getElementById('success-message');
+  const successMessage = document.getElementById('success-message');
 
-  // form submission 
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    // form data collection
-    const validateForm = () => {
- const eventName = document.getElementById('event-name').value;
-  const eventDescription = document.getElementById('event-description').value;
+  // form validation 
+  const validateForm = () => {
+    const eventName = document.getElementById('event-name').value;
+    const eventDescription = document.getElementById('event-description').value;
     const timeSlots = document.getElementById('event-time-slots').value;
 
-    if (!eventName.trim() || !eventDescription.trim() || !timeSlots.trim()) {
+  // field validation
+  if (!eventName.trim() || !eventDescription.trim() || !timeSlots.trim()) {
       alert('All fields are required.');
       return false;
     }
     return true;
   };
 
-    // send data to backend
+  // form submission handler
+  form.addEventListener('submit', async (event) => {
+  event.preventDefault(); 
+
+  // validate form
+    if (!validateForm()) {
+      return; 
+    }
+
+  // Collect form data collection
+  const eventName = document.getElementById('event-name').value;
+  const eventDescription = document.getElementById('event-description').value;
+  const timeSlots = document.getElementById('event-time-slots').value;
+
+    // Send data to backend
     try {
       const response = await fetch('/events', {
         method: 'POST',
@@ -29,36 +40,30 @@ const successMessage = document.getElementById('success-message');
           name: eventName,
           description: eventDescription,
           timeSlots,
-        }), 
+        }),
       });
-
-      // error message for forms
-      const validateForm = () => {
-        if (!eventName.trim() || !eventDescription.trim() || !timeSlots.trim()) {
-          alert('All fields are required.');
-          return false;
-        }
-        return true;
-      };
-      
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        if (!validateForm()) return;
-      
-        
-      });
-      
 
       if (response.ok) {
-        successMessage.style.display = 'block'; 
-        form.reset(); 
+        // success and reset
+        successMessage.style.display = 'block';
+        successMessage.textContent = 'Event created successfully!';
+        form.reset();
+
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
       } else {
-        console.error('Error creating event:', await response.text());
+        // Handle backend errors
+        const errorText = await response.text();
+        console.error('Error creating event:', errorText);
         alert('Failed to create the event. Please try again.');
       }
     } catch (error) {
+      // Handle network or unexpected errors
       console.error('Error:', error);
       alert('An error occurred. Please try again.');
     }
   });
 });
+
