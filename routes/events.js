@@ -51,10 +51,10 @@ router.get("/:id", async (req, res) => {
 // GET route to fetch all events
 router.get("/", async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM events");
+    const result = await db.query("SELECT event_id AS id, event_name AS name, description, time_slots AS timeSlots FROM events");
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Sorry, event not found." });
+      return res.status(404).json({ error: "No events found." });
     }
 
     res.status(200).json(result.rows);
