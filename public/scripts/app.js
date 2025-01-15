@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const attendeeForm = document.getElementById('availability-form');
   const attendeesList = document.getElementById('attendees-list');
 
+  successMessage.style.display = 'none';
+
    // nav in sections
    document.querySelectorAll('nav a').forEach((link) => {
     link.addEventListener('click', (e) => {
@@ -19,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = document.querySelector(link.getAttribute('href'));
       if (target) {
         target.style.display = 'block';
+      } else {
+        console.error(`Section ${link.getAttribute('href')} not found`);
       }
     });
   });
