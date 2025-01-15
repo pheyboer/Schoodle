@@ -28,12 +28,23 @@
     <section id="create-event">
       <h2>Create an Event</h2>
       <form id="event-form">
+         <!-- Event Name -->
         <label for="event-name">Event Name:</label>
 
         <input type="text" id="event-name" name="event-name" aria-label ="Event Name" required>
 
+        <!-- Event Description -->
         <label for="event-description">Description:</label>
         <textarea id="event-description" name="event-description" required></textarea>
+
+        <!-- Organizer Name and Email -->
+        <label for="organizer-name">Organizer's Name:</label>
+        <input type="text" id="organizer-name" name="organizer-name" required>
+
+        <label for="organizer-email">Organizer's Email:</label>
+        <input type="email" id="organizer-email" name="organizer-email" required>
+
+        <!-- Time Slots -->
 
         <label for="event-time-slots">Time Slots:</label>
         <div id="time-slot-container">
@@ -54,6 +65,9 @@
         <h3 id="event-name-display"></h3>
         <p id="event-description-display"></p>
         <ul id="attendees-list"></ul>
+        <!-- Modify and Delete Event Buttons -->
+        <button id="modify-event-button">Modify Event</button>
+        <button id="delete-event-button">Delete Event</button>
       </div>
     </section>
 
