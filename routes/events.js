@@ -4,23 +4,19 @@ const router = express.Router();
 
 // Post route for creating a new event - POST /events
 router.post("/", async (req, res) => {
-  // Destructure data from request body
   const { name, description, timeSlots } = req.body;
-
-  // log incoming data
-  console.log("POST /events - Request Body:", req.body);
 
   // Input validation
   if (!name || !description || !timeSlots) {
     console.error("POST /events - Missing fields:", req.body);
     return res
       .status(400)
-      .json({ error: "All fields required to create an event" });
+      .json({ error: "All fields are required to create an event." });
   }
 
   try {
     const result = await db.query(
-      "INSERT INTO events (event_name, description, time_slots) VALUES ($1, $2, $3, $4) RETURNING *",
+      "INSERT INTO events (event_name, description, time_slots) VALUES ($1, $2, $3) RETURNING *",
       [name, description, timeSlots]
     );
     const newEvent = result.rows[0];
@@ -31,6 +27,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 // GET route to fetch an event by ID - GET /events/:id
 router.get("/:id", async (req, res) => {
