@@ -73,6 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (response.ok) {
+        const newEvent = await response.json();
+        renderEvent(newEvent);
         
         successMessage.style.display = 'block';
         successMessage.textContent = 'Event created successfully!';
