@@ -17,6 +17,7 @@ app.set("view engine", "ejs");
 //         The :status token will be colored red for server error codes, yellow for client error codes, cyan for redirection codes, and uncolored for all other codes.
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(
   "/styles",
   sassMiddleware({
@@ -35,6 +36,7 @@ const usersRoutes = require("./routes/users");
 const eventsApiRoutes = require("./routes/events"); // Event API route
 const timeSlotApiRoutes = require("./routes/time_slots"); // Time slot API route
 const attendeeRoutes = require("./routes/attendees"); // Attendee API route
+const availabilityResponseRoutes = require("./routes/availability_responses"); // Availability response API
 
 // Mount all resource routes
 // Note: Feel free to replace the example routes below with your own
@@ -43,9 +45,10 @@ app.use("/api/users", userApiRoutes);
 app.use("/api/widgets", widgetApiRoutes);
 app.use("/users", usersRoutes);
 // Note: mount other resources here, using the same pattern above
-app.use("/api/time_slots", timeSlotApiRoutes);
-app.use("/api/events", eventsApiRoutes);
-app.use("/api/attendees", attendeeRoutes);
+app.use("/time_slots", timeSlotApiRoutes);
+app.use("/events", eventsApiRoutes);
+app.use("/attendees", attendeeRoutes);
+app.use("/availability_responses", availabilityResponseRoutes);
 
 // Home page
 // Warning: avoid creating more routes in this file!
