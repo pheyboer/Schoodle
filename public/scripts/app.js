@@ -97,6 +97,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+   // render event dynamically
+   const renderEvent = (event) => { 
+    const eventList = document.getElementById('event-list');
+    const eventItem = document.createElement('div');
+    eventItem.classList.add('event-item');
+    eventItem.innerHTML = `
+      <h3>${event.name}</h3>
+      <p>${event.description}</p>
+      <p><strong>Time Slots:</strong> ${event.timeSlots}</p>
+    `;
+    eventList.appendChild(eventItem);
+  };
+
   // Fetch Event Details 
   const fetchEventDetails = async (eventId) => {
     try {
