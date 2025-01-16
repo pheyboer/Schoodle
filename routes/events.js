@@ -83,7 +83,14 @@ router.get("/:uniqueUrl", async (req, res) => {
       [result.rows[0].id]
     );
 
+    // Added query for attendees
+    const attendeesResult = await db.query(
+      "SELECT DISTINCT name, email FROM attendees WHERE event_id = $1",
+      [result.rows[0].id]
+    );
+
     result.rows[0].time_slots = timeSlotsResult.rows;
+    result.rows[0].attendees = attendeesResult.rows;
 
     res.status(200).json(result.rows[0]);
   } catch (error) {
@@ -116,7 +123,14 @@ router.get("/:uniqueUrl/respond", async (req, res) => {
       [event.id]
     );
 
+    // Add query for attendees
+    const attendeesResult = await db.query(
+      "SELECT DISTINCT name, email FROM attendees WHERE event_id = $1",
+      [event.id]
+    );
+
     event.time_slots = timeSlotsResult.rows;
+    event.attendees = attendeesResult.rows;
 
     res.render("event_details", { event });
   } catch (error) {

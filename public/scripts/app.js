@@ -248,6 +248,51 @@ fetchAndDisplayEvents();
     document.getElementById('event-details').style.display = 'block';
   });
 
+  document.getElementById('response-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const attendeeName = document.getElementById('attendee-name').value.trim();
+    const attendeeEmail = document.getElementById('attendee-email').value.trim();
+    const timeSlots = Array.from(document.querySelectorAll('.time-slot-checkbox:checked')).map(checkbox => checkbox.value);
+    const eventId = document.getElementById('event-id').value;
+
+    if (!attendeeName || !attendeeEmail || timeSlots.length === 0) {
+      alert('All fields are required.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/availability_responses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: attendeeName,
+          email: attendeeEmail,
+          timeSlots: timeSlots,
+          event_id: eventId
+        }),
+      });
+
+      if (response.ok) {
+        // Add the new attendee to the list
+        const attendeesList = document.getElementById('attendees-list');
+        const newAttendee = document.createElement('li');
+        newAttendee.textContent = `${attendeeName} (${attendeeEmail})`;
+        attendeesList.appendChild(newAttendee);
+
+        alert('Availability submitted successfully!');
+        document.getElementById('response-form').reset();
+      } else {
+        const errorText = await response.text();
+        console.error('Error submitting availability:', errorText);
+        alert(`Failed to submit availability. Please try again. Error: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
+    }
+  });
+
 });
 
 // Add these functions after the existing code
