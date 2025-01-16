@@ -1,9 +1,11 @@
 // Client facing scripts here
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('event-form');
   const successMessage = document.getElementById('success-message');
   const attendeeForm = document.getElementById('availability-form');
   const attendeesList = document.getElementById('attendees-list');
+  const eventList = document.getElementById('event-list'); 
 
   // Ensure success message is hidden initially
   successMessage.style.display = 'none';
@@ -63,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // Ensure API endpoint matches the server route
-      const response = await fetch('/api/events', { 
+      const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (response.ok) {
         const newEvent = await response.json();
-        renderEvent(newEvent);
+        renderEvent(newEvent); // Render new event
 
         successMessage.style.display = 'block';
         successMessage.textContent = 'Event created successfully!';
@@ -98,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render event dynamically
   const renderEvent = (event) => {
-    const eventList = document.getElementById('event-list');
     const eventItem = document.createElement('div');
     eventItem.classList.add('event-item');
     eventItem.innerHTML = `
@@ -116,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         const events = await response.json();
         if (events.length === 0) {
-          document.getElementById('event-list').innerHTML = '<p>No events available. Create one above!</p>';
+          eventList.innerHTML = '<p>No events available. Create one above!</p>';
         } else {
           events.forEach((event) => renderEvent(event));
         }
@@ -139,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventData = await response.json();
 
         // Display event details
-        document.getElementById('event-name-display').textContent = eventData.event_name; 
+        document.getElementById('event-name-display').textContent = eventData.event_name;
         document.getElementById('event-description-display').textContent = eventData.description;
 
         // Display attendee details
@@ -172,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const response = await fetch('/api/availability', { 
+      const response = await fetch('/api/availability', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: attendeeName, time_slots: timeSlots }),
