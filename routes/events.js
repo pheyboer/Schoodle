@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await db.query(
-      "INSERT INTO events (event_name, description, organizer_name, organizer_email, unique_url) VALUES ($1, $2, $3, $4, $5) RETURNING event_id",
+      "INSERT INTO events (event_name, description, organizer_name, organizer_email, unique_url) VALUES ($1, $2, $3, $4, $5) RETURNING *",  // Changed to RETURNING *
       [event_name, description, organizer_name, organizer_email, uniqueUrl]
     );
 
@@ -45,7 +45,11 @@ router.post("/", async (req, res) => {
     const insertedTimeSlots = await Promise.all(timeSlotPromises);
 
     res.status(201).json({
-      ...newEvent,
+      event_id: event_id,
+      event_name: newEvent.event_name,
+      description: newEvent.description,
+      organizer_name: newEvent.organizer_name,
+      organizer_email: newEvent.organizer_email,
       uniqueUrl: `${req.protocol}://${req.get("host")}/events/${uniqueUrl}/respond`,
       time_slots: insertedTimeSlots,
     });

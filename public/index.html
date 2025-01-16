@@ -129,6 +129,15 @@
 
       document.getElementById('time-slots-section').appendChild(newTimeSlot);
     });
+
+    // Add these function declarations before they're used
+    function editTimeSlot(timeSlotId) {
+      window.editTimeSlot(timeSlotId);
+    }
+
+    function deleteTimeSlot(timeSlotId) {
+      window.deleteTimeSlot(timeSlotId);
+    }
   </script>
 
   <!-- Footer -->
