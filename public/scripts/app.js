@@ -89,8 +89,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const newEvent = await response.json();
         renderEvent(newEvent);
 
-        // Store the latest event in sessionStorage for event details tab
-        sessionStorage.setItem('latestEvent', JSON.stringify(newEvent));
+        // Store complete event data including organizer info
+        sessionStorage.setItem('latestEvent', JSON.stringify({
+          event_id: newEvent.event_id,
+          event_name: newEvent.event_name,
+          description: newEvent.description,
+          organizer_name: newEvent.organizer_name,
+          organizer_email: newEvent.organizer_email,
+          uniqueUrl: newEvent.uniqueUrl,
+          time_slots: newEvent.time_slots
+        }));
 
         // Stay on current page and show success message
         successMessage.style.display = 'block';
@@ -126,9 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const eventItem = document.createElement('div');
     eventItem.classList.add('event-item');
     eventItem.innerHTML = `
-      <h3>${event.name}</h3>
+      <h3>${event.event_name}</h3>
       <p>${event.description}</p>
-      <p><strong>Time Slots:</strong> ${event.timeSlots}</p>
+      <p><strong>Organizer:</strong> ${event.organizer_name}</p>
+      <p><strong>Contact:</strong> ${event.organizer_email}</p>
+      <p><strong>Time Slots:</strong> ${event.time_slots ? event.time_slots.length : 0} available</p>
     `;
     eventList.appendChild(eventItem);
   };
@@ -328,5 +338,81 @@ async function deleteEvent() {
       console.error('Error deleting event:', error);
       alert('Error deleting event. Please try again.');
     }
+  }
+}
+
+// Add these functions for time slot management
+async function editTimeSlot(timeSlotId) {
+  const latestEvent = JSON.parse(sessionStorage.getItem('latestEvent'));
+  const timeSlot = latestEvent.time_slots.find(slot => slot.time_slot_id === timeSlotId);
+
+  if (!timeSlot) return;
+
+  // Create a form for editing the time slot
+  const newStartTime = prompt('Enter new start time (YYYY-MM-DD HH:MM):', new Date(timeSlot.start_time).toLocaleString());
+  const newEndTime = prompt('Enter new end time (YYYY-MM-DD HH:MM):', new Date(timeSlot.end_time).toLocaleString());
+
+  if (!newStartTime || !newEndTime) return;
+
+  try {
+    const response = await fetch(`/time_slots/${timeSlotId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        start_time: new Date(newStartTime).toISOString(),
+        end_time: new Date(newEndTime).toISOString()
+      })
+    });
+
+    if (response.ok) {
+      // Update the time slot in session storage
+      const updatedTimeSlots = latestEvent.time_slots.map(slot =>
+        slot.time_slot_id === timeSlotId
+          ? { ...slot, start_time: newStartTime, end_time: newEndTime }
+          : slot
+      );
+      latestEvent.time_slots = updatedTimeSlots;
+      sessionStorage.setItem('latestEvent', JSON.stringify(latestEvent));
+
+      // Refresh the display
+      document.querySelector('a[href="#event-details"]').click();
+    } else {
+      alert('Failed to update time slot');
+    }
+  } catch (error) {
+    console.error('Error updating time slot:', error);
+    alert('Error updating time slot');
+  }
+}
+
+async function deleteTimeSlot(timeSlotId) {
+  if (!confirm('Are you sure you want to delete this time slot?')) return;
+
+  const latestEvent = JSON.parse(sessionStorage.getItem('latestEvent'));
+
+  try {
+    const response = await fetch(`/time_slots/${timeSlotId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      // Remove the time slot from session storage
+      const updatedTimeSlots = latestEvent.time_slots.filter(slot => slot.time_slot_id !== timeSlotId);
+      latestEvent.time_slots = updatedTimeSlots;
+      sessionStorage.setItem('latestEvent', JSON.stringify(latestEvent));
+
+      // Refresh the display
+      document.querySelector('a[href="#event-details"]').click();
+    } else {
+      alert('Failed to delete time slot');
+    }
+  } catch (error) {
+    console.error('Error deleting time slot:', error);
+    alert('Error deleting time slot');
   }
 }
