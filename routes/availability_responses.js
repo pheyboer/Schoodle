@@ -2,35 +2,57 @@ const express = require("express");
 const db = require("../db/connection");
 const router = express.Router();
 
-// POST route to submit availability - POST /api/availability
+// POST route to submit availability - POST /availability_responses
 router.post("/", async (req, res) => {
-  const { name, timeSlots, event_id } = req.body;
+  console.log('Received request body:', req.body); // Debug logging
+  const { name, email, timeSlots, event_id } = req.body;  // Add email to destructuring
 
-  if (!name || !Array.isArray(timeSlots) || timeSlots.length === 0 || !event_id) {
-    return res.status(400).json({ error: "Name, event ID, and at least one time slot are required." });
+  if (!name || !email || !Array.isArray(timeSlots) || timeSlots.length === 0 || !event_id) {
+    return res.status(400).json({ error: "Name, email, event ID, and at least one time slot are required." });
   }
 
   try {
+    // Start a transaction
+    await db.query('BEGIN');
+
+    // Create attendee with required fields according to schema
     const attendeeResult = await db.query(
-      "INSERT INTO attendees (name) VALUES ($1) RETURNING attendee_id",
-      [name]
+      "INSERT INTO attendees (name, email, event_id) VALUES ($1, $2, $3) RETURNING attendee_id",
+      [name, email, event_id]  // Use the email from the request
     );
 
     const attendeeId = attendeeResult.rows[0].attendee_id;
+    console.log('Created attendee with ID:', attendeeId); // Debug logging
 
-    const availabilityPromises = timeSlots.map(async (timeSlotId) => {
-      return db.query(
+    // Insert availability responses
+    for (const timeSlotId of timeSlots) {
+      await db.query(
         "INSERT INTO availability_responses (attendee_id, time_slot_id, event_id) VALUES ($1, $2, $3)",
         [attendeeId, timeSlotId, event_id]
       );
-    });
+    }
 
-    await Promise.all(availabilityPromises);
+    // Commit the transaction
+    await db.query('COMMIT');
 
     res.status(201).json({ message: "Availability submitted successfully!" });
   } catch (error) {
-    console.error("Error submitting availability:", error);
-    res.status(500).json({ error: "Server error" });
+    // Rollback in case of error
+    await db.query('ROLLBACK');
+    console.error("Error submitting availability:", error.message); // Detailed error logging
+
+    if (error.constraint) {
+      // Handle specific database constraint violations
+      res.status(400).json({
+        error: "Database constraint violation",
+        details: error.detail
+      });
+    } else {
+      res.status(500).json({
+        error: "Server error",
+        details: error.message
+      });
+    }
   }
 });
 
