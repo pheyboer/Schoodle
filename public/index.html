@@ -29,7 +29,7 @@
     <section id="create-event">
       <h2>Create an Event</h2>
       <!-- Updated action to match the backend route -->
-      <form id="event-form">
+      <form id="event-form" action="/api/events" method="POST">
         <label for="event_name">Event Name:</label>
         <input type="text" id="event_name" name="event_name" required>
 

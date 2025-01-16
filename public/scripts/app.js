@@ -1,14 +1,14 @@
-// Client facing scripts here
+// Client-facing scripts here
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('event-form');
   const successMessage = document.getElementById('success-message');
   const attendeeForm = document.getElementById('availability-form');
   const attendeesList = document.getElementById('attendees-list');
-  const eventList = document.getElementById('event-list'); 
+  const eventList = document.getElementById('event-list');
 
   // Ensure success message is hidden initially
-  successMessage.style.display = 'none';
+  if (successMessage) successMessage.style.display = 'none';
 
   // Navigation between sections
   document.querySelectorAll('nav a').forEach((link) => {
@@ -37,9 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Form validation
   const validateForm = () => {
-    const eventName = document.getElementById('event-name').value.trim();
-    const eventDescription = document.getElementById('event-description').value.trim();
-    const timeSlots = document.getElementById('event-time-slots').value.trim();
+    const eventName = document.getElementById('event_name').value.trim();
+    const eventDescription = document.getElementById('description').value.trim();
+    const timeSlots = document.getElementById('time_slot').value.trim();
 
     // Ensure all fields are filled
     if (!eventName || !eventDescription || !timeSlots) {
@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Form submission handler
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    console.log('Form submitted!');
 
     // Validate form
     if (!validateForm()) {
@@ -59,9 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Collect form data
-    const eventName = document.getElementById('event-name').value.trim();
-    const eventDescription = document.getElementById('event-description').value.trim();
-    const timeSlots = document.getElementById('event-time-slots').value.trim();
+    const eventName = document.getElementById('event_name').value.trim();
+    const eventDescription = document.getElementById('description').value.trim();
+    const timeSlots = document.getElementById('time_slot').value.trim();
 
     try {
       // Ensure API endpoint matches the server route
@@ -69,9 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          event_name: eventName, 
+          event_name: eventName,
           description: eventDescription,
-          time_slots: timeSlots.split(',').map((slot) => slot.trim()), 
+          time_slots: timeSlots.split(',').map((slot) => ({ start_time: slot.trim(), end_time: slot.trim() })),
         }),
       });
 
@@ -79,13 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const newEvent = await response.json();
         renderEvent(newEvent); // Render new event
 
-        successMessage.style.display = 'block';
-        successMessage.textContent = 'Event created successfully!';
+        if (successMessage) {
+          successMessage.style.display = 'block';
+          successMessage.textContent = 'Event created successfully!';
+        }
         form.reset();
 
         // Hide success message after 3 seconds
         setTimeout(() => {
-          successMessage.style.display = 'none';
+          if (successMessage) successMessage.style.display = 'none';
         }, 3000);
       } else {
         const errorText = await response.text();
@@ -105,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     eventItem.innerHTML = `
       <h3>${event.event_name}</h3>
       <p>${event.description}</p>
-      <p><strong>Time Slots:</strong> ${event.time_slots.join(', ')}</p> <!-- FIX: Properly join array -->
+      <p><strong>Time Slots:</strong> ${event.time_slots.map(slot => slot.start_time).join(', ')}</p>
     `;
     eventList.appendChild(eventItem);
   };
@@ -113,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fetch all events and display them on the page
   const fetchAndDisplayEvents = async () => {
     try {
-      const response = await fetch('/api/events'); 
+      const response = await fetch('/api/events');
       if (response.ok) {
         const events = await response.json();
         if (events.length === 0) {
@@ -131,65 +134,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Fetch events on page load
   fetchAndDisplayEvents();
-
-  // Fetch event details
-  const fetchEventDetails = async (eventId) => {
-    try {
-      const response = await fetch(`/api/events/${eventId}`);
-      if (response.ok) {
-        const eventData = await response.json();
-
-        // Display event details
-        document.getElementById('event-name-display').textContent = eventData.event_name;
-        document.getElementById('event-description-display').textContent = eventData.description;
-
-        // Display attendee details
-        attendeesList.innerHTML = '';
-        for (const attendee of eventData.attendees) {
-          const listItem = document.createElement('li');
-          listItem.textContent = attendee.name;
-          attendeesList.appendChild(listItem);
-        }
-      } else {
-        console.error('Failed to fetch event details:', await response.text());
-      }
-    } catch (error) {
-      console.error('Error fetching event details:', error);
-    }
-  };
-
-  // Attendee form submission
-  attendeeForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const attendeeName = document.getElementById('attendee-name').value.trim();
-    const timeSlots = Array.from(
-      document.querySelectorAll('input[name="time-slot"]:checked')
-    ).map((checkbox) => checkbox.value);
-
-    if (!attendeeName || timeSlots.length === 0) {
-      alert('Please provide your name and select at least one time slot.');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/availability', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: attendeeName, time_slots: timeSlots }),
-      });
-
-      if (response.ok) {
-        alert('Availability submitted successfully!');
-        attendeeForm.reset();
-      } else {
-        const errorText = await response.text();
-        console.error('Error submitting availability:', errorText);
-        alert('Failed to submit availability. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again.');
-    }
-  });
 });
