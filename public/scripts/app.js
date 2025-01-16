@@ -129,6 +129,10 @@ const fetchAndDisplayEvents = async () => {
   }
 };
 
+// fetchAndDisplayEvents on page load
+fetchAndDisplayEvents();
+
+
   // Fetch Event Details 
   const fetchEventDetails = async (eventId) => {
     try {
@@ -154,10 +158,7 @@ const fetchAndDisplayEvents = async () => {
       console.error('Error fetching event details:', error);
     }
   };
-
-  // Fetch event details for a specific event 
-  fetchAndDisplayEvents();
-
+  
   // Attendee Form Submission
   attendeeForm.addEventListener('submit', async (event) => {
     event.preventDefault();
