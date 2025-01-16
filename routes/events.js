@@ -84,6 +84,12 @@ router.get("/:uniqueUrl", async (req, res) => {
       console.error("GET /events/:uniqueUrl - Event Not Found:", uniqueUrl);
       return res.status(404).json({ error: "Sorry, event not found." });
     }
+
+    const timeSlotsResult = await db.query(
+      "SELECT time_slot_id, start_time, end_time FROM time_slots WHERE event_id = $1",
+      [result.rows[0].id]
+    );
+    
     console.log("GET /events/:uniqueUrl - Event Fetched Successfully:", result.rows[0]);
     res.status(200).json(result.rows[0]);
   } catch (error) {
