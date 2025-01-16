@@ -122,6 +122,14 @@ router.get("/:id", async (req, res) => {
       console.error("GET /events/:id - Event Not Found:", id);
       return res.status(404).json({ error: "Sorry, event not found." });
     }
+
+    const timeSlotsResult = await db.query(
+      "SELECT time_slot_id, start_time, end_time FROM time_slots WHERE event_id = $1",
+      [id]
+    );
+
+    result.rows[0].time_slots = timeSlotsResult.rows;
+
     console.log(
       "GET /events/:id - Event Fetched Successfully:",
       result.rows[0]
