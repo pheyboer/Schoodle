@@ -78,6 +78,10 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
+// route for favicon.ico requests
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
