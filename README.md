@@ -1,4 +1,3 @@
-
 # Schoodle - A Scheduling Application
 
 Schoodle is a simple scheduling application built using Node.js, Express, and PostgreSQL for the backend. The frontend utilizes HTML, CSS/SCSS, and jQuery to provide an intuitive user interface.
@@ -7,6 +6,7 @@ Schoodle is a simple scheduling application built using Node.js, Express, and Po
 
 - **Backend**: Node.js, Express, PostgreSQL
 - **Frontend**: HTML, CSS/SCSS, JavaScript, jQuery
+- **Testing**: Jest, Supertest
 - **Version Control**: Git
 - **Security**: Unique event URLs, input validation
 
@@ -93,6 +93,8 @@ Schoodle is a simple scheduling application built using Node.js, Express, and Po
 
 ### **Dev Dependencies**
 
+- **jest**: Testing framework for JavaScript
+- **supertest**: HTTP assertions and testing for Node.js
 - **nodemon**: Automatically restarts the server during development
 
 ---
@@ -109,10 +111,30 @@ To run the application locally, follow these steps:
 
 ---
 
+## Testing
+
+The application includes automated tests for the backend API.
+
+### Running Tests
+
+1. Ensure you have Jest and Supertest installed (already included in `devDependencies`).
+2. Run the tests:
+
+   ```bash
+   npm test
+   ```
+
+### Testing Tools
+
+- **Jest**: JavaScript testing framework
+- **Supertest**: HTTP assertions and testing library for Node.js
+
+---
+
 ## Notes
 
 - **Database Setup**: If you don't have the `midterm` database already created, you can do so by running:
-  
+
   ```sql
   CREATE DATABASE midterm;
   ```
@@ -129,38 +151,44 @@ To run the application locally, follow these steps:
 - **Request Body:**
   ```json
   {
-    "title": "Team Meeting",
+    "event_name": "Team Meeting",
     "description": "Discuss project progress",
     "organizer_name": "Abbas",
-    "organizer_email": "abbas@example.com"
+    "organizer_email": "abbas@example.com",
+    "time_slots": [
+      { "start_time": "2025-01-16T10:00:00Z", "end_time": "2025-01-16T11:00:00Z" }
+    ]
   }
   ```
 - **Response:**
   ```json
   {
-    "id": 1,
-    "title": "Team Meeting",
+    "event_id": 1,
+    "event_name": "Team Meeting",
     "description": "Discuss project progress",
     "organizer_name": "Abbas",
     "organizer_email": "abbas@example.com",
-    "created_at": "2025-01-11T12:00:00Z"
+    "uniqueUrl": "http://localhost:8080/events/unique-url/respond",
+    "time_slots": [
+      { "time_slot_id": 1, "start_time": "2025-01-16T10:00:00Z", "end_time": "2025-01-16T11:00:00Z" }
+    ]
   }
   ```
 
-### GET /events/:id
+### GET /events/:uniqueUrl
 
-- **Description:** Fetch details of an event by its ID.
+- **Description:** Fetch details of an event by its unique URL.
 - **Request Parameters:**
-  - `:id` - The unique ID of the event.
+  - `:uniqueUrl` - The unique URL of the event.
 - **Response:**
   ```json
   {
-    "id": 1,
-    "title": "Team Meeting",
+    "event_id": 1,
+    "event_name": "Team Meeting",
     "description": "Discuss project progress",
-    "organizer_name": "Abbas",
-    "organizer_email": "abbas@example.com",
-    "created_at": "2025-01-11T12:00:00Z"
+    "time_slots": [
+      { "time_slot_id": 1, "start_time": "2025-01-16T10:00:00Z", "end_time": "2025-01-16T11:00:00Z" }
+    ]
   }
   ```
 
@@ -187,7 +215,7 @@ To run the application locally, follow these steps:
 
 ### Tables
 
-1. **Events Table:** Stores event details (title, description, organizer info).
+1. **Events Table:** Stores event details (event_name, description, organizer info).
 2. **Attendees Table:** Stores attendee information (name, email).
 3. **Time Slots Table:** Stores proposed time slots for each event.
 4. **Availability Responses Table:** Tracks attendee responses for each time slot.
