@@ -10,13 +10,13 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-  <!-- in app navigation-->
+  <!-- App Navigation -->
   <header>
     <h1>Schoodle</h1>
     <nav>
       <ul>
         <li><a href="#create-event">Create Event</a></li>
-        <li><a href="#users-section">Users</a></li>
+        <li><a href="#event-list-section">Event List</a></li>
         <li><a href="#event-details">Event Details</a></li>
         <li><a href="#attendee-form">Attendee Form</a></li>
       </ul>
@@ -28,7 +28,8 @@
     <!-- Event Creation Form -->
     <section id="create-event">
       <h2>Create an Event</h2>
-      <form action="/create-event" method="POST">
+      <!-- Updated action to match the backend route -->
+      <form id="event-form">
         <label for="event_name">Event Name:</label>
         <input type="text" id="event_name" name="event_name" required>
 
@@ -39,34 +40,34 @@
         <input type="text" id="organizer_name" name="organizer_name" required>
 
         <label for="organizer_email">Organizer Email:</label>
-        <input type="text" id="organizer_email" name="organizer_email" required>
+        <input type="email" id="organizer_email" name="organizer_email" required>
 
-        <label for="time_slot">Time Slot:</label>
-        <input type="text" id="time_slot" name="time_slot" required>
+        <label for="time_slots">Time Slots (comma-separated):</label>
+        <input type="text" id="time_slots" name="time_slots" required>
 
         <button type="submit">Create Event</button>
-    </form>
+      </form>
 
+      <!-- Success message hidden by default -->
       <div id="success-message" style="display: none;">Event created successfully!</div>
     </section>
 
-     <!-- Event List Section -->
-     <section id="event-list-section">
+    <!-- Event List Section -->
+    <section id="event-list-section">
       <h2>Event List</h2>
       <div id="event-list">
-        
+        <!-- Events will be dynamically loaded here -->
       </div>
     </section>
-    
 
-    <!-- User section -->
+    <!-- User Section -->
     <section id="users-section" style="display: none;">
       <h2>Users</h2>
       <button id="fetch-users">Fetch Users</button>
       <ul id="users"></ul>
     </section>
 
-    <!-- Event Details part -->
+    <!-- Event Details Section -->
     <section id="event-details" style="display: none;">
       <h2>Event Details</h2>
       <div id="event-info">
@@ -76,7 +77,7 @@
       </div>
     </section>
 
-    <!-- Attendee Availability form -->
+    <!-- Attendee Availability Form -->
     <section id="attendee-form" style="display: none;">
       <h2>Submit Availability</h2>
       <form id="availability-form">
@@ -87,7 +88,7 @@
           <legend>Available Time Slots:</legend>
           <label><input type="checkbox" name="time-slot" value="9-10am"> 9:00 AM - 10:00 AM</label>
           <label><input type="checkbox" name="time-slot" value="10-11am"> 10:00 AM - 11:00 AM</label>
-          <!-- adding more slots -->
+          <!-- Add more time slots here if necessary -->
         </fieldset>
 
         <button type="submit">Submit</button>
@@ -100,10 +101,8 @@
     <p>Schoodle &copy; 2025</p>
   </footer>
 
-  <!-- JavaScript file link-->
-
+  <!-- JavaScript file links -->
   <script src="/scripts/users.js"></script>
-
   <script src="/scripts/app.js"></script>
 </body>
 </html>
