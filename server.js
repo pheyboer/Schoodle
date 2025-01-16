@@ -13,11 +13,11 @@ const app = express();
 app.set("view engine", "ejs");
 
 // Load the logger first so all (static) HTTP requests are logged to STDOUT
-// 'dev' = Concise output colored by response status for development use.
-//         The :status token will be colored red for server error codes, yellow for client error codes, cyan for redirection codes, and uncolored for all other codes.
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Static file middleware
 app.use(
   "/styles",
   sassMiddleware({
@@ -28,43 +28,49 @@ app.use(
 );
 app.use(express.static("public"));
 
+// Validate database connection on startup
+db.query("SELECT NOW()")
+  .then(() => console.log("Database connected successfully."))
+  .catch((err) => {
+    console.error("Database connection error:", err);
+    process.exit(1); // Exit the application if the database is not connected
+  });
+
 // Separated Routes for each Resource
-// Note: Feel free to replace the example routes below with your own
 const userApiRoutes = require("./routes/users-api");
-const widgetApiRoutes = require("./routes/widgets-api");
-const usersRoutes = require("./routes/users");
 const eventsApiRoutes = require("./routes/events"); // Event API route
 const timeSlotApiRoutes = require("./routes/time_slots"); // Time slot API route
 const attendeeRoutes = require("./routes/attendees"); // Attendee API route
 const availabilityResponseRoutes = require("./routes/availability_responses"); // Availability response API
 
 // Mount all resource routes
-// Note: Feel free to replace the example routes below with your own
-// Note: Endpoints that return data (eg. JSON) usually start with `/api`
-app.use("/api/users", userApiRoutes);
-app.use("/api/widgets", widgetApiRoutes);
-app.use("/users", usersRoutes);
-app.use("/api/events", eventsApiRoutes);
-// Note: mount other resources here, using the same pattern above
-app.use("/api/time_slots", timeSlotApiRoutes);
-app.use("/api/attendees", attendeeRoutes);
-app.use("/api/availability_responses", availabilityResponseRoutes);
+app.use("/api/users", userApiRoutes); // Example route
+app.use("/api/events", eventsApiRoutes); // Event creation and fetching
+app.use("/api/time_slots", timeSlotApiRoutes); // Time slot management
+app.use("/api/attendees", attendeeRoutes); // Attendee data
+app.use("/api/availability_responses", availabilityResponseRoutes); // Availability submissions
 
-console.log("Routes connected: /api/events, /api/time_slots, /api/attendees, /api/availability_responses");
+console.log(
+  "Routes connected: /api/events, /api/time_slots, /api/attendees, /api/availability_responses"
+);
 
-
-// Home page
-// Warning: avoid creating more routes in this file!
-// Separate them into separate routes files (see above).
-
-app.get("/", (req, res) => {
-  res.render("index");
+// **Add Global Error Handling Middleware**
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err.stack);
+  res.status(500).json({ error: "Internal server error. Please try again later." });
 });
 
-// database connection test
+// Home page route
+app.get("/", (req, res) => {
+  res.render("index"); // Render the home page
+  console.log("GET / - Rendered index page.");
+});
+
+// **Database Connection Test Endpoint**
 app.get("/test-db", async (req, res) => {
   try {
     const testQuery = await db.query("SELECT NOW()");
+    console.log("Database connection test successful.");
     res.status(200).json({ message: "Database connected", time: testQuery.rows[0] });
   } catch (error) {
     console.error("Database connection test failed:", error);
@@ -72,6 +78,7 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
