@@ -1,11 +1,11 @@
-// load .env data into process.env
+// Load .env data into process.env
 require("dotenv").config();
 
 // Web server config
 const sassMiddleware = require("./lib/sass-middleware");
 const express = require("express");
 const morgan = require("morgan");
-const db = require("./db/connection"); // Import the database connection
+const db = require("./db/connection"); 
 
 const PORT = process.env.PORT || 8080;
 const app = express();
@@ -28,33 +28,34 @@ app.use(
 );
 app.use(express.static("public"));
 
-// Validate database connection on startup
+
 db.query("SELECT NOW()")
   .then(() => console.log("Database connected successfully."))
   .catch((err) => {
     console.error("Database connection error:", err);
-    process.exit(1); // Exit the application if the database is not connected
+    process.exit(1); 
   });
 
 // Separated Routes for each Resource
 const userApiRoutes = require("./routes/users-api");
-const eventsApiRoutes = require("./routes/events"); // Event API route
-const timeSlotApiRoutes = require("./routes/time_slots"); // Time slot API route
-const attendeeRoutes = require("./routes/attendees"); // Attendee API route
-const availabilityResponseRoutes = require("./routes/availability_responses"); // Availability response API
+const eventsApiRoutes = require("./routes/events"); 
+const timeSlotApiRoutes = require("./routes/time_slots"); 
+const attendeeRoutes = require("./routes/attendees"); 
+const availabilityResponseRoutes = require("./routes/availability_responses"); 
 
 // Mount all resource routes
-app.use("/api/users", userApiRoutes); // Example route
-app.use("/api/events", eventsApiRoutes); // Event creation and fetching
-app.use("/api/time_slots", timeSlotApiRoutes); // Time slot management
-app.use("/api/attendees", attendeeRoutes); // Attendee data
-app.use("/api/availability_responses", availabilityResponseRoutes); // Availability submissions
+app.use("/api/users", userApiRoutes); 
+app.use("/api/events", eventsApiRoutes); 
+app.use("/api/time_slots", timeSlotApiRoutes); 
+app.use("/api/attendees", attendeeRoutes); 
+app.use("/api/availability_responses", availabilityResponseRoutes); 
 
+// Highlighting connected routes
 console.log(
   "Routes connected: /api/events, /api/time_slots, /api/attendees, /api/availability_responses"
 );
 
-// **Add Global Error Handling Middleware**
+// Add Global Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err.stack);
   res.status(500).json({ error: "Internal server error. Please try again later." });
@@ -62,11 +63,11 @@ app.use((err, req, res, next) => {
 
 // Home page route
 app.get("/", (req, res) => {
-  res.render("index"); // Render the home page
+  res.render("index"); 
   console.log("GET / - Rendered index page.");
 });
 
-// **Database Connection Test Endpoint**
+// Database Connection Test Endpoint
 app.get("/test-db", async (req, res) => {
   try {
     const testQuery = await db.query("SELECT NOW()");
@@ -76,6 +77,12 @@ app.get("/test-db", async (req, res) => {
     console.error("Database connection test failed:", error);
     res.status(500).json({ error: "Database connection failed" });
   }
+});
+
+// Handle Undefined Routes
+app.use((req, res) => {
+  console.warn(`Unhandled route: ${req.method} ${req.url}`);
+  res.status(404).json({ error: "Route not found." });
 });
 
 // Start the server
