@@ -1,45 +1,16 @@
-// Client-facing scripts here
-
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('event-form');
   const successMessage = document.getElementById('success-message');
-  const attendeeForm = document.getElementById('availability-form');
-  const attendeesList = document.getElementById('attendees-list');
   const eventList = document.getElementById('event-list');
 
   // Ensure success message is hidden initially
   if (successMessage) successMessage.style.display = 'none';
 
-  // Navigation between sections
-  document.querySelectorAll('nav a').forEach((link) => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      // Hide all sections
-      document.querySelectorAll('main > section').forEach((section) => {
-        section.style.display = 'none';
-      });
-
-      // Show the target section
-      const target = document.querySelector(link.getAttribute('href'));
-      if (target) {
-        target.style.display = 'block';
-      } else {
-        console.error(`Section ${link.getAttribute('href')} not found`);
-      }
-    });
-  });
-
-  // Show only the first section on page load
-  document.querySelectorAll('main > section').forEach((section, index) => {
-    section.style.display = index === 0 ? 'block' : 'none';
-  });
-
   // Form validation
   const validateForm = () => {
     const eventName = document.getElementById('event_name').value.trim();
     const eventDescription = document.getElementById('description').value.trim();
-    const timeSlots = document.getElementById('time_slot').value.trim();
+    const timeSlots = document.getElementById('time_slots').value.trim();
 
     // Ensure all fields are filled
     if (!eventName || !eventDescription || !timeSlots) {
@@ -52,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Form submission handler
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    console.log('Form submitted!');
 
     // Validate form
     if (!validateForm()) {
@@ -62,23 +32,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Collect form data
     const eventName = document.getElementById('event_name').value.trim();
     const eventDescription = document.getElementById('description').value.trim();
-    const timeSlots = document.getElementById('time_slot').value.trim();
+    const organizerName = document.getElementById('organizer_name').value.trim();
+    const organizerEmail = document.getElementById('organizer_email').value.trim();
+    const timeSlots = document.getElementById('time_slots').value.trim();
 
     try {
-      // Ensure API endpoint matches the server route
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event_name: eventName,
           description: eventDescription,
-          time_slots: timeSlots.split(',').map((slot) => ({ start_time: slot.trim(), end_time: slot.trim() })),
+          organizer_name: organizerName,
+          organizer_email: organizerEmail,
+          time_slots: timeSlots.split(',').map((slot) => ({
+            start_time: slot.trim(),
+            end_time: slot.trim(), // Assuming start and end time are the same for simplicity
+          })),
         }),
       });
 
       if (response.ok) {
         const newEvent = await response.json();
-        renderEvent(newEvent); // Render new event
+        renderEvent(newEvent);
 
         if (successMessage) {
           successMessage.style.display = 'block';
@@ -108,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     eventItem.innerHTML = `
       <h3>${event.event_name}</h3>
       <p>${event.description}</p>
+      <p><strong>Organizer:</strong> ${event.organizer_name} (${event.organizer_email})</p>
       <p><strong>Time Slots:</strong> ${event.time_slots.map(slot => slot.start_time).join(', ')}</p>
     `;
     eventList.appendChild(eventItem);
@@ -122,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (events.length === 0) {
           eventList.innerHTML = '<p>No events available. Create one above!</p>';
         } else {
+          eventList.innerHTML = ''; // Clear existing events
           events.forEach((event) => renderEvent(event));
         }
       } else {

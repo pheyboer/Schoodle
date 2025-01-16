@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Schoodle</title>
-  <!-- CSS file link -->
   <link rel="stylesheet" href="styles.css">
-  <!-- jQuery link -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -28,8 +26,7 @@
     <!-- Event Creation Form -->
     <section id="create-event">
       <h2>Create an Event</h2>
-      <!-- Updated action to match the backend route -->
-      <form id="event-form" action="/api/events" method="POST">
+      <form id="event-form" action="#" method="POST">
         <label for="event_name">Event Name:</label>
         <input type="text" id="event_name" name="event_name" required>
 
@@ -48,51 +45,13 @@
         <button type="submit">Create Event</button>
       </form>
 
-      <!-- Success message hidden by default -->
       <div id="success-message" style="display: none;">Event created successfully!</div>
     </section>
 
     <!-- Event List Section -->
     <section id="event-list-section">
       <h2>Event List</h2>
-      <div id="event-list">
-        <!-- Events will be dynamically loaded here -->
-      </div>
-    </section>
-
-    <!-- User Section -->
-    <section id="users-section" style="display: none;">
-      <h2>Users</h2>
-      <button id="fetch-users">Fetch Users</button>
-      <ul id="users"></ul>
-    </section>
-
-    <!-- Event Details Section -->
-    <section id="event-details" style="display: none;">
-      <h2>Event Details</h2>
-      <div id="event-info">
-        <h3 id="event-name-display"></h3>
-        <p id="event-description-display"></p>
-        <ul id="attendees-list"></ul>
-      </div>
-    </section>
-
-    <!-- Attendee Availability Form -->
-    <section id="attendee-form" style="display: none;">
-      <h2>Submit Availability</h2>
-      <form id="availability-form">
-        <label for="attendee-name">Your Name:</label>
-        <input type="text" id="attendee-name" name="attendee-name" required>
-
-        <fieldset>
-          <legend>Available Time Slots:</legend>
-          <label><input type="checkbox" name="time-slot" value="9-10am"> 9:00 AM - 10:00 AM</label>
-          <label><input type="checkbox" name="time-slot" value="10-11am"> 10:00 AM - 11:00 AM</label>
-          <!-- Add more time slots here if necessary -->
-        </fieldset>
-
-        <button type="submit">Submit</button>
-      </form>
+      <div id="event-list"></div>
     </section>
   </main>
 
@@ -101,8 +60,7 @@
     <p>Schoodle &copy; 2025</p>
   </footer>
 
-  <!-- JavaScript file links -->
-  <script src="/scripts/users.js"></script>
+  <!-- JavaScript File -->
   <script src="/scripts/app.js"></script>
 </body>
 </html>
