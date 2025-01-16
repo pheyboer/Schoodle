@@ -5,19 +5,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const attendeeForm = document.getElementById('availability-form');
   const attendeesList = document.getElementById('attendees-list');
 
+  // Ensure success message is hidden initially
   successMessage.style.display = 'none';
 
-   // nav in sections
-   document.querySelectorAll('nav a').forEach((link) => {
+  // Navigation between sections
+  document.querySelectorAll('nav a').forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
 
-      // Hide sections
+      // Hide all sections
       document.querySelectorAll('main > section').forEach((section) => {
         section.style.display = 'none';
       });
 
-      // Show target section
+      // Show the target section
       const target = document.querySelector(link.getAttribute('href'));
       if (target) {
         target.style.display = 'block';
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // show first page on load
+  // Show only the first section on page load
   document.querySelectorAll('main > section').forEach((section, index) => {
     section.style.display = index === 0 ? 'block' : 'none';
   });
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const eventDescription = document.getElementById('event-description').value.trim();
     const timeSlots = document.getElementById('event-time-slots').value.trim();
 
-    // Field validation form
+    // Ensure all fields are filled
     if (!eventName || !eventDescription || !timeSlots) {
       alert('All fields are required.');
       return false;
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   };
 
-  // Form submission handler 
+  // Form submission handler
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -60,22 +61,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const eventDescription = document.getElementById('event-description').value.trim();
     const timeSlots = document.getElementById('event-time-slots').value.trim();
 
-    // Send data to backend
     try {
-      const response = await fetch('/events', {
+      // Ensure API endpoint matches the server route
+      const response = await fetch('/api/events', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: eventName,
+          event_name: eventName, 
           description: eventDescription,
-          timeSlots,
+          time_slots: timeSlots.split(',').map((slot) => slot.trim()), 
         }),
       });
 
       if (response.ok) {
         const newEvent = await response.json();
         renderEvent(newEvent);
-        
+
         successMessage.style.display = 'block';
         successMessage.textContent = 'Event created successfully!';
         form.reset();
@@ -85,66 +86,63 @@ document.addEventListener('DOMContentLoaded', () => {
           successMessage.style.display = 'none';
         }, 3000);
       } else {
-        // Handle backend errors
         const errorText = await response.text();
         console.error('Error creating event:', errorText);
         alert('Failed to create the event. Please try again.');
       }
     } catch (error) {
-      // Handle network or unexpected errors
       console.error('Error:', error);
       alert('An error occurred. Please try again.');
     }
   });
 
-   // render event dynamically
-   const renderEvent = (event) => {
+  // Render event dynamically
+  const renderEvent = (event) => {
     const eventList = document.getElementById('event-list');
     const eventItem = document.createElement('div');
     eventItem.classList.add('event-item');
     eventItem.innerHTML = `
-      <h3>${event.name}</h3>
+      <h3>${event.event_name}</h3>
       <p>${event.description}</p>
-      <p><strong>Time Slots:</strong> ${event.timeSlots}</p>
+      <p><strong>Time Slots:</strong> ${event.time_slots.join(', ')}</p> <!-- FIX: Properly join array -->
     `;
     eventList.appendChild(eventItem);
   };
 
-// fetch all events and display on same page
-const fetchAndDisplayEvents = async () => { 
-  try {
-    const response = await fetch('/events');
-    if (response.ok) {
-      const events = await response.json();
-      if (events.length === 0) {
-        document.getElementById('event-list').innerHTML = '<p>No events available. Create one above!</p>'; // FIXED
+  // Fetch all events and display them on the page
+  const fetchAndDisplayEvents = async () => {
+    try {
+      const response = await fetch('/api/events'); 
+      if (response.ok) {
+        const events = await response.json();
+        if (events.length === 0) {
+          document.getElementById('event-list').innerHTML = '<p>No events available. Create one above!</p>';
+        } else {
+          events.forEach((event) => renderEvent(event));
+        }
       } else {
-        events.forEach((event) => renderEvent(event));
+        console.error('Failed to fetch events:', await response.text());
       }
-    } else {
-      console.error('Failed to fetch events:', await response.text());
+    } catch (error) {
+      console.error('Error fetching events:', error);
     }
-  } catch (error) {
-    console.error('Error fetching events:', error);
-  }
-};
+  };
 
-// fetchAndDisplayEvents on page load
-fetchAndDisplayEvents();
+  // Fetch events on page load
+  fetchAndDisplayEvents();
 
-
-  // Fetch Event Details 
+  // Fetch event details
   const fetchEventDetails = async (eventId) => {
     try {
       const response = await fetch(`/api/events/${eventId}`);
       if (response.ok) {
         const eventData = await response.json();
 
-        // display event details
-        document.getElementById('event-name-display').textContent = eventData.name;
+        // Display event details
+        document.getElementById('event-name-display').textContent = eventData.event_name; 
         document.getElementById('event-description-display').textContent = eventData.description;
 
-      // display attendee details
+        // Display attendee details
         attendeesList.innerHTML = '';
         for (const attendee of eventData.attendees) {
           const listItem = document.createElement('li');
@@ -158,8 +156,8 @@ fetchAndDisplayEvents();
       console.error('Error fetching event details:', error);
     }
   };
-  
-  // Attendee Form Submission
+
+  // Attendee form submission
   attendeeForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -174,10 +172,10 @@ fetchAndDisplayEvents();
     }
 
     try {
-      const response = await fetch('/api/availability', {
+      const response = await fetch('/api/availability', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: attendeeName, timeSlots }),
+        body: JSON.stringify({ name: attendeeName, time_slots: timeSlots }),
       });
 
       if (response.ok) {
