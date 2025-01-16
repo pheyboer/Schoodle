@@ -135,14 +135,14 @@ router.get("/", async (req, res) => {
 // PUT route for updating event details
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, description, timeSlots } = req.body;
+  const { event_name, description, time_slots } = req.body;
 
   // log incoming request and body
   console.log("PUT /events/:id - Event ID:", id);
   console.log("PUT /events/:id - Request Body:", req.body);
 
   // Input validation
-  if (!name || !description || !timeSlots) {
+  if (!event_name || !description || !time_slots) {
     console.error("PUT /events/:id - Missing fields:", req.body);
     return res
       .status(400)
@@ -150,15 +150,34 @@ router.put("/:id", async (req, res) => {
   }
 
   try {
+    // updating event details
     const result = await db.query(
-      "UPDATE events SET event_name = $1, description = $2, time_slots = $3 WHERE event_id = $4 RETURNING *",
-      [name, description, timeSlots, id]
+      "UPDATE events SET event_name = $1, description = $2 WHERE event_id = $3 RETURNING *",
+      [event_name, description, id]
     );
 
     if (result.rows.length === 0) {
       console.error("PUT /events/:id - Event Not Found for Update:", id);
       return res.status(404).json({ error: "Event not found." });
     }
+
+    // Update time slots for the event
+    // Delete the existing time slots
+    const deleteSlotsResult = await db.query(
+      "DELETE FROM time_slots WHERE event_id = $1",
+      [id]
+    );
+
+    // Insert the new time slots
+    const timeSlotPromises = time_slots.map(async (slot) => {
+      const { start_time, end_time } = slot;
+      return db.query(
+        "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING time_slot_id, start_time, end_time",
+        [id, start_time, end_time]
+      );
+    });
+
+    await Promise.all(timeSlotPromises);
 
     console.log(
       "PUT /events/:id - Event Updated Successfully:",
