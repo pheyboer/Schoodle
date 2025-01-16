@@ -10,50 +10,38 @@ function generateUniqueId() {
 
 // POST route for creating a new event - POST /api/events
 router.post("/", async (req, res) => {
-  const { event_name, description, organizer_name, organizer_email, time_slots } = req.body;
+  const { event_name, description, time_slots } = req.body;
 
-  // Input validation
-  if (!event_name || !description || !organizer_name || !organizer_email || !Array.isArray(time_slots)) {
-    console.error("POST /api/events - Missing or invalid fields:", req.body);
-    return res.status(400).json({ error: "All fields are required to create an event." });
+  if (!event_name || !description || !time_slots || !Array.isArray(time_slots)) {
+    return res.status(400).json({ error: "All fields are required." });
   }
 
-  // Generate a unique URL
   const uniqueUrl = generateUniqueId();
 
   try {
     const result = await db.query(
-      "INSERT INTO events (event_name, description, organizer_name, organizer_email, unique_url) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [event_name, description, organizer_name, organizer_email, uniqueUrl]
+      "INSERT INTO events (event_name, description, unique_url) VALUES ($1, $2, $3) RETURNING *",
+      [event_name, description, uniqueUrl]
     );
-
     const newEvent = result.rows[0];
     const event_id = newEvent.event_id;
 
-    // Validate and insert time slots
-    const timeSlotPromises = time_slots.map(async (slot) => {
-      const { start_time, end_time } = slot;
-      if (!start_time || !end_time) {
-        throw new Error("Invalid time slot structure.");
-      }
-      const slotResult = await db.query(
-        "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING time_slot_id, start_time, end_time",
+    const timeSlotPromises = time_slots.map(async ({ start_time, end_time }) => {
+      return db.query(
+        "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING *",
         [event_id, start_time, end_time]
       );
-      return slotResult.rows[0];
     });
 
     const insertedTimeSlots = await Promise.all(timeSlotPromises);
 
-    console.log("POST /api/events - Event Created Successfully:", newEvent);
     res.status(201).json({
       ...newEvent,
-      uniqueUrl: `${req.protocol}://${req.get("host")}/events/${uniqueUrl}`,
-      time_slots: insertedTimeSlots,
+      time_slots: insertedTimeSlots.map((slot) => slot.rows[0]),
     });
   } catch (error) {
-    console.error("POST /api/events - Error creating event:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Error creating event:", error);
+    res.status(500).json({ error: "Failed to create event." });
   }
 });
 
