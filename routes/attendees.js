@@ -2,14 +2,11 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/connection');
 
-
-// POST route to create new attendee POST /attendees
+// POST route to create new attendee - POST /attendees
 router.post("/", async (req, res) => {
-  console.log(req.body);
   const { event_id, name, email } = req.body;
 
-  // Input validation
-  if(!event_id || !name || !email) {
+  if (!event_id || !name || !email) {
     return res.status(400).json({ error: "Event ID, name, and email are all required" });
   }
 
@@ -21,31 +18,29 @@ router.post("/", async (req, res) => {
     const newAttendee = result.rows[0];
     res.status(201).json(newAttendee);
   } catch (error) {
-    console.error("Error creating attendee", error);
     res.status(500).json({ error: "Server Error" });
   }
 });
 
-
-// GET route to get attendees for a given event GET /attendees/event/:eventId
+// GET route to get attendees for a given event - GET /attendees/event/:eventId
 router.get("/event/:eventId", async (req, res) => {
   const { eventId } = req.params;
 
   try {
-    const result = await db.query("SELECT * FROM attendees WHERE event_id = $1", [eventId]);
+    const result = await db.query(
+      "SELECT DISTINCT name, email FROM attendees WHERE event_id = $1",
+      [eventId]
+    );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "No attendees found for the event" });
-    }
-
+    // will return empty array instead of 404 when no attendees found
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("Error getting attendees for event", error);
+    console.error('Error fetching attendees:', error);
     res.status(500).json({ error: "Server Error" });
   }
 });
 
-// GET route to get attendee by ID GET /attendees/:id
+// GET route to get attendee by ID - GET /attendees/:id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -58,17 +53,15 @@ router.get("/:id", async (req, res) => {
 
     res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error("Error getting attendee:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-//PUT route for updating an attendee PUT /attendees/:id
+// PUT route for updating an attendee - PUT /attendees/:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { event_id, name, email } = req.body;
 
-  // Input validation
   if (!event_id || !name || !email) {
     return res.status(400).json({ error: "Event ID, name, and email are required to update attendee." });
   }
@@ -85,7 +78,6 @@ router.put("/:id", async (req, res) => {
 
     res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error("Error updating attendee:", error);
     res.status(500).json({ error: "Server error" });
   }
 });

@@ -17,25 +17,32 @@ router.post("/", async (req, res) => {
 
     // Create attendee with required fields according to schema
     const attendeeResult = await db.query(
-      "INSERT INTO attendees (name, email, event_id) VALUES ($1, $2, $3) RETURNING attendee_id",
+      "INSERT INTO attendees (name, email, event_id) VALUES ($1, $2, $3) RETURNING *",
       [name, email, event_id]  // Use the email from the request
     );
 
-    const attendeeId = attendeeResult.rows[0].attendee_id;
-    console.log('Created attendee with ID:', attendeeId); // Debug logging
+    const attendee = attendeeResult.rows[0];
+    console.log('Created attendee with ID:', attendee.attendee_id); // Debug logging can take out later
 
     // Insert availability responses
     for (const timeSlotId of timeSlots) {
       await db.query(
         "INSERT INTO availability_responses (attendee_id, time_slot_id, event_id) VALUES ($1, $2, $3)",
-        [attendeeId, timeSlotId, event_id]
+        [attendee.attendee_id, timeSlotId, event_id]
       );
     }
 
     // Commit the transaction
     await db.query('COMMIT');
 
-    res.status(201).json({ message: "Availability submitted successfully!" });
+    // Return the created attendee info
+    res.status(201).json({
+      message: "Availability submitted successfully!",
+      attendee: {
+        name: attendee.name,
+        email: attendee.email
+      }
+    });
   } catch (error) {
     // Rollback in case of error
     await db.query('ROLLBACK');
