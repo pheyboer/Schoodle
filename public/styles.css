@@ -114,10 +114,24 @@ button {
   font-size: 1rem;
   cursor: pointer;
   border-radius: 4px;
-  width: 100%;
+  width: auto;
+  min-width: 200px;
+  margin: 10px 0;
 }
 
 button:hover {
+  background-color: #45a049;
+}
+
+button[type="submit"] {
+  margin: 30px auto 10px;
+  padding: 15px;
+  font-size: 1.1rem;
+  background-color: #4CAF50;
+  display: block;
+}
+
+button[type="submit"]:hover {
   background-color: #45a049;
 }
 
@@ -132,9 +146,46 @@ button:hover {
 /* Event Details Section Styling */
 #event-info {
   background-color: #fff;
-  padding: 20px;
+  padding: 30px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#event-info h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+#event-info h4 {
+  color: #2196F3;
+  margin: 20px 0 10px;
+  font-size: 1.2rem;
+}
+
+#event-description-display {
+  margin-bottom: 25px;
+  line-height: 1.6;
+  color: #555;
+}
+
+.organizer-info, .time-slots-info, .share-info, .attendees-info {
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.time-slots-info ul {
+  list-style: none;
+  padding: 0;
+}
+
+.time-slots-info li {
+  padding: 8px;
+  margin: 5px 0;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #eee;
 }
 
 /* List Styling */
@@ -168,10 +219,250 @@ fieldset input[type="checkbox"] {
   margin-right: 10px;
 }
 
+/* Time Slots Section Styling */
+#time-slots-section {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time-slot-entry {
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.time-slot-entry label {
+  display: inline-block;
+  width: 100px;
+  margin-right: 10px;
+}
+
+.time-slot-entry input[type="datetime-local"] {
+  margin: 5px 0;
+  padding: 8px;
+  width: calc(100% - 120px);
+}
+
+/* Button Spacing and Styling */
+#add-time-slot {
+  margin: 20px auto;
+  background-color: #2196F3;
+  width: auto;
+  padding: 10px 20px;
+  display: block;
+}
+
+/* Form Button Container */
+#event-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Unique URL Section Styling */
+#unique-url-section {
+  text-align: center;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  max-width: 600px;
+}
+
+#event-url {
+  margin: 15px 0;
+  word-break: break-all;
+}
+
+#event-url a {
+  color: #2196F3;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+#event-url a:hover {
+  text-decoration: underline;
+}
+
+/* Response Form Styling */
+#response-form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.time-slots-container {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+}
+
+.time-slots-container h4 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.time-slot-option {
+  padding: 10px;
+  margin: 5px 0;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  transition: background-color 0.2s;
+}
+
+.time-slot-option:hover {
+  background-color: #f0f9ff;
+}
+
+.time-slot-option label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.time-slot-option input[type="checkbox"] {
+  margin-right: 15px;
+  width: 18px;
+  height: 18px;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.submit-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  min-width: 150px;
+}
+
+.cancel-button {
+  background-color: #6c757d;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  min-width: 150px;
+}
+
+.submit-button:hover {
+  background-color: #45a049;
+}
+
+.cancel-button:hover {
+  background-color: #5a6268;
+}
+
+/* Response Form Input Styling */
+#response-form .form-group {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#response-form input[type="text"],
+#response-form input[type="email"] {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  margin: 0 auto;
+  display: block;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+#response-form input[type="text"]:focus,
+#response-form input[type="email"]:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+#response-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: bold;
+}
+
 /* Footer Styling */
 footer {
   text-align: center;
   background-color: #333;
   color: white;
   padding: 10px 0;
+}
+
+/* Event Actions Styling */
+.event-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 15px;
+}
+
+.edit-button {
+  background-color: #2196F3;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.edit-button:hover {
+  background-color: #1976D2;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+.time-slot-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.time-slots-info li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
 }

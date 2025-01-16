@@ -16,9 +16,7 @@
     <nav>
       <ul>
         <li><a href="#create-event">Create Event</a></li>
-        <li><a href="#users-section">Users</a></li>
         <li><a href="#event-details">Event Details</a></li>
-        <li><a href="#attendee-form">Attendee Form</a></li>
       </ul>
     </nav>
   </header>
@@ -76,40 +74,30 @@
       </div>
     </section>
 
-
-    <!-- User section -->
-    <section id="users-section" style="display: none;">
-      <h2>Users</h2>
-      <button id="fetch-users">Fetch Users</button>
-      <ul id="users"></ul>
-    </section>
-
     <!-- Event Details part -->
     <section id="event-details" style="display: none;">
       <h2>Event Details</h2>
       <div id="event-info">
         <h3 id="event-name-display"></h3>
         <p id="event-description-display"></p>
-        <ul id="attendees-list"></ul>
+        <div class="organizer-info">
+          <h4>Organizer Information</h4>
+          <p>Name: <span id="organizer-name-display"></span></p>
+          <p>Email: <span id="organizer-email-display"></span></p>
+        </div>
+        <div id="time-slots-display" class="time-slots-info">
+          <h4>Available Time Slots</h4>
+        </div>
+        <div id="unique-url-display" class="share-info"></div>
+        <div class="attendees-info">
+          <h4>Current Attendees</h4>
+          <ul id="attendees-list"></ul>
+        </div>
+        <div class="event-actions">
+          <button type="button" class="edit-button" onclick="editEvent()">Edit Event</button>
+          <button type="button" class="delete-button" onclick="deleteEvent()">Delete Event</button>
+        </div>
       </div>
-    </section>
-
-    <!-- Attendee Availability form -->
-    <section id="attendee-form" style="display: none;">
-      <h2>Submit Availability</h2>
-      <form id="availability-form">
-        <label for="attendee-name">Your Name:</label>
-        <input type="text" id="attendee-name" name="attendee-name" required>
-
-        <fieldset>
-          <legend>Available Time Slots:</legend>
-          <label><input type="checkbox" name="time-slot" value="9-10am"> 9:00 AM - 10:00 AM</label>
-          <label><input type="checkbox" name="time-slot" value="10-11am"> 10:00 AM - 11:00 AM</label>
-          <!-- adding more slots -->
-        </fieldset>
-
-        <button type="submit">Submit</button>
-      </form>
     </section>
   </main>
 
@@ -149,9 +137,6 @@
   </footer>
 
   <!-- JavaScript file link-->
-
-  <script src="/scripts/users.js"></script>
-
   <script src="/scripts/app.js"></script>
 </body>
 </html>
