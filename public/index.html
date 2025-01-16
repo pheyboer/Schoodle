@@ -28,12 +28,12 @@
     <!-- Event Creation Form -->
     <section id="create-event">
       <h2>Create an Event</h2>
-      <form action="/create-event" method="POST">
-        <label for="event_name">Event Name:</label>
-        <input type="text" id="event_name" name="event_name" required>
+      <form id="event-form">
+        <label for="event-name">Event Name:</label>
+        <input type="text" id="event-name" name="event_name" required>
 
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" required></textarea>
+        <label for="event-description">Description:</label>
+        <textarea id="event-description" name="description" required></textarea>
 
         <label for="organizer_name">Organizer Name:</label>
         <input type="text" id="organizer_name" name="organizer_name" required>
@@ -42,24 +42,30 @@
         <input type="text" id="organizer_email" name="organizer_email" required>
 
         <!-- Time Slots Section -->
-      <div id="time-slots-section">
-        <h3>Time Slots:</h3>
-        <div class="time-slot-entry">
-          <label for="start-time">Start Time:</label>
-          <input type="datetime-local" name="start_time[]" required>
+        <div id="time-slots-section">
+          <h3>Time Slots:</h3>
+          <div class="time-slot-entry">
+            <label for="start-time">Start Time:</label>
+            <input type="datetime-local" name="start_time[]" required>
 
-          <label for="end-time">End Time:</label>
-          <input type="datetime-local" name="end_time[]" required>
+            <label for="end-time">End Time:</label>
+            <input type="datetime-local" name="end_time[]" required>
+          </div>
         </div>
-      </div>
 
-      <!-- Add another time slot button -->
-      <button type="button" id="add-time-slot">Add Another Time Slot</button>
+        <!-- Add another time slot button -->
+        <button type="button" id="add-time-slot">Add Another Time Slot</button>
 
         <button type="submit">Create Event</button>
-    </form>
+      </form>
 
       <div id="success-message" style="display: none;">Event created successfully!</div>
+    </section>
+
+    <!-- Unique URL Section -->
+    <section id="unique-url-section" style="display: none;">
+      <h2>Event URL</h2>
+      <p id="event-url"></p>
     </section>
 
      <!-- Event List Section -->

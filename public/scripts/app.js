@@ -36,17 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const validateForm = () => {
     const eventName = document.getElementById('event-name').value.trim();
     const eventDescription = document.getElementById('event-description').value.trim();
-    const timeSlots = document.getElementById('event-time-slots').value.trim();
+    const organizerName = document.getElementById('organizer_name').value.trim();
+    const organizerEmail = document.getElementById('organizer_email').value.trim();
+    const timeSlotEntries = document.querySelectorAll('.time-slot-entry');
+
+    // Ensure all time slots have start and end times
+    const timeSlots = Array.from(timeSlotEntries).map(slot => ({
+      start_time: slot.querySelector('input[name="start_time[]"]').value,
+      end_time: slot.querySelector('input[name="end_time[]"]').value
+    }));
 
     // Field validation form
-    if (!eventName || !eventDescription || !timeSlots) {
+    if (!eventName || !eventDescription || !organizerName || !organizerEmail || timeSlots.some(slot => !slot.start_time || !slot.end_time)) {
       alert('All fields are required.');
       return false;
     }
     return true;
   };
 
-  // Form submission handler 
+  // Form submission handler
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -58,7 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Collect form data
     const eventName = document.getElementById('event-name').value.trim();
     const eventDescription = document.getElementById('event-description').value.trim();
-    const timeSlots = document.getElementById('event-time-slots').value.trim();
+    const organizerName = document.getElementById('organizer_name').value.trim();
+    const organizerEmail = document.getElementById('organizer_email').value.trim();
+    const timeSlots = Array.from(document.querySelectorAll('.time-slot-entry')).map(slot => ({
+      start_time: slot.querySelector('input[name="start_time[]"]').value,
+      end_time: slot.querySelector('input[name="end_time[]"]').value
+    }));
 
     // Send data to backend
     try {
@@ -66,33 +79,41 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: eventName,
+          event_name: eventName,
           description: eventDescription,
-          timeSlots,
+          organizer_name: organizerName,
+          organizer_email: organizerEmail,
+          time_slots: timeSlots,
         }),
       });
 
       if (response.ok) {
         const newEvent = await response.json();
         renderEvent(newEvent);
-        
+
         successMessage.style.display = 'block';
         successMessage.textContent = 'Event created successfully!';
         form.reset();
 
-        // Hide success message after 3 seconds
+        // Display the unique URL
+        const uniqueUrlSection = document.getElementById('unique-url-section');
+        const eventUrl = document.getElementById('event-url');
+        eventUrl.innerHTML = `<a href="${newEvent.uniqueUrl}" target="_blank">${newEvent.uniqueUrl}</a>`;
+        uniqueUrlSection.style.display = 'block';
+
+        // Hide success message after 10 seconds
         setTimeout(() => {
           successMessage.style.display = 'none';
-        }, 3000);
+        }, 10000);
       } else {
         // Handle backend errors
         const errorText = await response.text();
-        console.error('Error creating event:', errorText);
-        alert('Failed to create the event. Please try again.');
+        console.error('Error creating event:', errorText); // Log the error response
+        alert(`Failed to create the event. Please try again. Error: ${errorText}`);
       }
     } catch (error) {
       // Handle network or unexpected errors
-      console.error('Error:', error);
+      console.error('Error:', error); // Log the error
       alert('An error occurred. Please try again.');
     }
   });
@@ -111,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
 // fetch all events and display on same page
-const fetchAndDisplayEvents = async () => { 
+const fetchAndDisplayEvents = async () => {
   try {
     const response = await fetch('/events');
     if (response.ok) {
@@ -133,7 +154,7 @@ const fetchAndDisplayEvents = async () => {
 fetchAndDisplayEvents();
 
 
-  // Fetch Event Details 
+  // Fetch Event Details
   const fetchEventDetails = async (eventId) => {
     try {
       const response = await fetch(`/api/events/${eventId}`);
@@ -158,7 +179,7 @@ fetchAndDisplayEvents();
       console.error('Error fetching event details:', error);
     }
   };
-  
+
   // Attendee Form Submission
   attendeeForm.addEventListener('submit', async (event) => {
     event.preventDefault();
