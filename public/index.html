@@ -41,8 +41,20 @@
         <label for="organizer_email">Organizer Email:</label>
         <input type="text" id="organizer_email" name="organizer_email" required>
 
-        <label for="time_slot">Time Slot:</label>
-        <input type="text" id="time_slot" name="time_slot" required>
+        <!-- Time Slots Section -->
+      <div id="time-slots-section">
+        <h3>Time Slots:</h3>
+        <div class="time-slot-entry">
+          <label for="start-time">Start Time:</label>
+          <input type="datetime-local" name="start_time[]" required>
+
+          <label for="end-time">End Time:</label>
+          <input type="datetime-local" name="end_time[]" required>
+        </div>
+      </div>
+
+      <!-- Add another time slot button -->
+      <button type="button" id="add-time-slot">Add Another Time Slot</button>
 
         <button type="submit">Create Event</button>
     </form>
@@ -54,10 +66,10 @@
      <section id="event-list-section">
       <h2>Event List</h2>
       <div id="event-list">
-        
+
       </div>
     </section>
-    
+
 
     <!-- User section -->
     <section id="users-section" style="display: none;">
@@ -94,6 +106,36 @@
       </form>
     </section>
   </main>
+
+  <script>
+    document.getElementById('add-time-slot').addEventListener('click', function() {
+      const newTimeSlot = document.createElement('div');
+      newTimeSlot.classList.add('time-slot-entry');
+
+      const startTimeLabel = document.createElement('label');
+      startTimeLabel.setAttribute('for', 'start-time');
+      startTimeLabel.textContent = 'Start Time:';
+      const startTimeInput = document.createElement('input');
+      startTimeInput.setAttribute('type', 'datetime-local');
+      startTimeInput.setAttribute('name', 'start_time[]');
+      startTimeInput.setAttribute('required', 'true');
+
+      const endTimeLabel = document.createElement('label');
+      endTimeLabel.setAttribute('for', 'end-time');
+      endTimeLabel.textContent = 'End Time:';
+      const endTimeInput = document.createElement('input');
+      endTimeInput.setAttribute('type', 'datetime-local');
+      endTimeInput.setAttribute('name', 'end_time[]');
+      endTimeInput.setAttribute('required', 'true');
+
+      newTimeSlot.appendChild(startTimeLabel);
+      newTimeSlot.appendChild(startTimeInput);
+      newTimeSlot.appendChild(endTimeLabel);
+      newTimeSlot.appendChild(endTimeInput);
+
+      document.getElementById('time-slots-section').appendChild(newTimeSlot);
+    });
+  </script>
 
   <!-- Footer -->
   <footer>
