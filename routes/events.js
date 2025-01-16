@@ -8,9 +8,29 @@ function generateUniqueId() {
   return crypto.randomBytes(12).toString("hex");
 }
 
-// POST route for creating a new event - POST /events
-router.post("/", async (req, res) => {
+// Middleware for validating request body
+const validateEventRequest = (req, res, next) => {
   const { event_name, description, organizer_name, organizer_email, time_slots } = req.body;
+
+  if (!event_name || !description || !organizer_name || !organizer_email || !Array.isArray(time_slots)) {
+    return res.status(400).json({
+      error: "Missing required fields or invalid time_slots format.",
+    });
+  }
+
+  if (time_slots.some(slot => !slot.start_time || !slot.end_time)) {
+    return res.status(400).json({
+      error: "Each time slot must have start_time and end_time.",
+    });
+  }
+
+  next();
+};
+
+// POST route for creating a new event - POST /events
+router.post("/", validateEventRequest, async (req, res) => {
+  const { event_name, description, organizer_name, organizer_email, time_slots } = req.body;
+  const uniqueUrl = generateUniqueId();
 
   console.log("POST /events - Request Body:", req.body); // Log the request body
 
@@ -18,11 +38,9 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "All fields are required to create an event." });
   }
 
-  const uniqueUrl = generateUniqueId();
-
   try {
     const result = await db.query(
-      "INSERT INTO events (event_name, description, organizer_name, organizer_email, unique_url) VALUES ($1, $2, $3, $4, $5) RETURNING *",  // Changed to RETURNING *
+      "INSERT INTO events (event_name, description, organizer_name, organizer_email, unique_url) VALUES ($1, $2, $3, $4, $5) RETURNING *", // Changed to RETURNING *
       [event_name, description, organizer_name, organizer_email, uniqueUrl]
     );
 
