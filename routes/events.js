@@ -1,5 +1,5 @@
 const express = require("express");
-const crypto = require("crypto"); 
+const crypto = require("crypto"); // Import crypto for unique URL generation
 const db = require("../db/connection");
 const router = express.Router();
 
@@ -8,13 +8,13 @@ function generateUniqueId() {
   return crypto.randomBytes(12).toString("hex");
 }
 
-// POST route for creating a new event - POST /events
+// POST route for creating a new event - POST /api/events
 router.post("/", async (req, res) => {
   const { event_name, description, organizer_name, organizer_email, time_slots } = req.body;
 
   // Input validation
-  if (!event_name || !description || !organizer_name || !organizer_email || !time_slots) {
-    console.error("POST /events - Missing fields:", req.body);
+  if (!event_name || !description || !organizer_name || !organizer_email || !Array.isArray(time_slots)) {
+    console.error("POST /api/events - Missing or invalid fields:", req.body);
     return res.status(400).json({ error: "All fields are required to create an event." });
   }
 
@@ -30,18 +30,12 @@ router.post("/", async (req, res) => {
     const newEvent = result.rows[0];
     const event_id = newEvent.event_id;
 
-    // validate time slots
-    if (
-      !Array.isArray(time_slots) ||
-      time_slots.some((slot) => !slot.start_time || !slot.end_time)
-    ) {
-      console.error("POST /events - Invalid time_slots structure");
-      return res.status(400).json({ error: "Invalid time_slots format." });
-    }
-
-    // Insert time slots for the event
+    // Validate and insert time slots
     const timeSlotPromises = time_slots.map(async (slot) => {
       const { start_time, end_time } = slot;
+      if (!start_time || !end_time) {
+        throw new Error("Invalid time slot structure.");
+      }
       const slotResult = await db.query(
         "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING time_slot_id, start_time, end_time",
         [event_id, start_time, end_time]
@@ -49,37 +43,23 @@ router.post("/", async (req, res) => {
       return slotResult.rows[0];
     });
 
-    // Wait for all time slots to be inserted
     const insertedTimeSlots = await Promise.all(timeSlotPromises);
 
-    console.log("POST /events - Event Created Successfully:", newEvent);
+    console.log("POST /api/events - Event Created Successfully:", newEvent);
     res.status(201).json({
       ...newEvent,
       uniqueUrl: `${req.protocol}://${req.get("host")}/events/${uniqueUrl}`,
       time_slots: insertedTimeSlots,
     });
   } catch (error) {
-    console.error("POST /events - Error creating event:", error);
-
-    // error message code
-    if (error.code === "23505") {
-      return res.status(400).json({ error: "Event already exists." });
-    }
-
+    console.error("POST /api/events - Error creating event:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// GET route to fetch an event by its unique URL - GET /events/:uniqueUrl
+// GET route to fetch an event by its unique URL - GET /api/events/:uniqueUrl
 router.get("/:uniqueUrl", async (req, res) => {
   const { uniqueUrl } = req.params;
-
-  if (!uniqueUrl) {
-    console.error("GET /events/:uniqueUrl - Missing unique URL");
-    return res.status(400).json({ error: "Unique URL is required." });
-  }
-
-  console.log("GET /events/:uniqueUrl - Unique URL:", uniqueUrl);
 
   try {
     const result = await db.query(
@@ -88,7 +68,7 @@ router.get("/:uniqueUrl", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      console.error("GET /events/:uniqueUrl - Event Not Found:", uniqueUrl);
+      console.error("GET /api/events/:uniqueUrl - Event Not Found:", uniqueUrl);
       return res.status(404).json({ error: "Event not found." });
     }
 
@@ -99,17 +79,16 @@ router.get("/:uniqueUrl", async (req, res) => {
 
     result.rows[0].time_slots = timeSlotsResult.rows;
 
-    console.log("GET /events/:uniqueUrl - Event Fetched Successfully:", result.rows[0]);
+    console.log("GET /api/events/:uniqueUrl - Event Fetched Successfully:", result.rows[0]);
     res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error("GET /events/:uniqueUrl - Error fetching event:", error);
+    console.error("GET /api/events/:uniqueUrl - Error fetching event:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// GET route for api events
+// GET route for all events - GET /api/events
 router.get("/", async (req, res) => {
-  console.log("GET /api/events - Fetching all events");
   try {
     const result = await db.query("SELECT * FROM events");
     if (result.rows.length === 0) {
@@ -120,56 +99,18 @@ router.get("/", async (req, res) => {
     res.status(200).json(result.rows);
   } catch (error) {
     console.error("GET /api/events - Error fetching events:", error);
-    res.status(500).json({ error: "Server Error" });
-  }
-});
-
-// GET route to fetch an event by ID - GET /events/:id
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-
-  if (!id) {
-    console.error("GET /events/:id - Missing event ID");
-    return res.status(400).json({ error: "Event ID is required." });
-  }
-
-  try {
-    const result = await db.query(
-      "SELECT event_id AS id, event_name AS name, description FROM events WHERE event_id = $1",
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      console.error("GET /events/:id - Event Not Found:", id);
-      return res.status(404).json({ error: "Event not found." });
-    }
-
-    const timeSlotsResult = await db.query(
-      "SELECT time_slot_id, start_time, end_time FROM time_slots WHERE event_id = $1",
-      [id]
-    );
-
-    result.rows[0].time_slots = timeSlotsResult.rows;
-
-    console.log("GET /events/:id - Event Fetched Successfully:", result.rows[0]);
-    res.status(200).json(result.rows[0]);
-  } catch (error) {
-    console.error("GET /events/:id - Error fetching event:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// PUT route for updating event details - PUT /events/:id
+// PUT route for updating event details - PUT /api/events/:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { event_name, description, time_slots } = req.body;
 
-  console.log("PUT /events/:id - Event ID:", id);
-  console.log("PUT /events/:id - Request Body:", req.body);
-
-  if (!event_name || !description || !time_slots) {
-    console.error("PUT /events/:id - Missing fields:", req.body);
-    return res.status(400).json({ error: "All fields needed to update event." });
+  if (!event_name || !description || !Array.isArray(time_slots)) {
+    console.error("PUT /api/events/:id - Missing or invalid fields:", req.body);
+    return res.status(400).json({ error: "All fields needed to update the event." });
   }
 
   try {
@@ -179,15 +120,17 @@ router.put("/:id", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      console.error("PUT /events/:id - Event Not Found for Update:", id);
+      console.error("PUT /api/events/:id - Event Not Found for Update:", id);
       return res.status(404).json({ error: "Event not found." });
     }
 
-    // Update time slots
     await db.query("DELETE FROM time_slots WHERE event_id = $1", [id]);
 
     const timeSlotPromises = time_slots.map(async (slot) => {
       const { start_time, end_time } = slot;
+      if (!start_time || !end_time) {
+        throw new Error("Invalid time slot structure.");
+      }
       return db.query(
         "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING time_slot_id, start_time, end_time",
         [id, start_time, end_time]
@@ -196,10 +139,10 @@ router.put("/:id", async (req, res) => {
 
     const updatedTimeSlots = await Promise.all(timeSlotPromises);
 
-    console.log("PUT /events/:id - Event Updated Successfully:", result.rows[0]);
+    console.log("PUT /api/events/:id - Event Updated Successfully:", result.rows[0]);
     res.status(200).json({ ...result.rows[0], time_slots: updatedTimeSlots });
   } catch (error) {
-    console.error("PUT /events/:id - Error updating event:", error);
+    console.error("PUT /api/events/:id - Error updating event:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
