@@ -61,6 +61,17 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+// connection test
+app.get("/test-db", async (req, res) => {
+  try {
+    const testQuery = await db.query("SELECT NOW()");
+    res.status(200).json({ message: "Database connected", time: testQuery.rows[0] });
+  } catch (error) {
+    console.error("Database connection test failed:", error);
+    res.status(500).json({ error: "Database connection failed" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
