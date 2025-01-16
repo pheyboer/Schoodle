@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
   const { event_name, description, organizer_name, organizer_email, time_slots } = req.body;
 
   // Input validation
-  if (!event_name || !description || !organizer_name || organizer_email || !time_slots) {
+  if (!event_name || !description || !organizer_name || !organizer_email || !time_slots) {
     console.error("POST /events - Missing fields:", req.body);
     return res
       .status(400)
