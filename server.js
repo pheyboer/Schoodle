@@ -44,11 +44,14 @@ const availabilityResponseRoutes = require("./routes/availability_responses"); /
 app.use("/api/users", userApiRoutes);
 app.use("/api/widgets", widgetApiRoutes);
 app.use("/users", usersRoutes);
+app.use("/api/events", eventsApiRoutes);
 // Note: mount other resources here, using the same pattern above
-app.use("/time_slots", timeSlotApiRoutes);
-app.use("/events", eventsApiRoutes);
-app.use("/attendees", attendeeRoutes);
-app.use("/availability_responses", availabilityResponseRoutes);
+app.use("/api/time_slots", timeSlotApiRoutes);
+app.use("/api/attendees", attendeeRoutes);
+app.use("/api/availability_responses", availabilityResponseRoutes);
+
+console.log("Routes connected: /api/events, /api/time_slots, /api/attendees, /api/availability_responses");
+
 
 // Home page
 // Warning: avoid creating more routes in this file!
