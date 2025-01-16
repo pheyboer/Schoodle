@@ -185,6 +185,7 @@ fetchAndDisplayEvents();
     event.preventDefault();
 
     const attendeeName = document.getElementById('attendee-name').value.trim();
+    const eventId = document.getElementById('event-id').value;
     const timeSlots = Array.from(
       document.querySelectorAll('input[name="time-slot"]:checked')
     ).map((checkbox) => checkbox.value);
@@ -198,7 +199,7 @@ fetchAndDisplayEvents();
       const response = await fetch('/api/availability', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: attendeeName, timeSlots }),
+        body: JSON.stringify({ name: attendeeName, timeSlots, event_id: eventId }),
       });
 
       if (response.ok) {

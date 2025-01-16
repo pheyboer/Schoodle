@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= event.name %> - Event Details</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <h1><%= event.name %></h1>
+    <p><%= event.description %></p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Time Slots</h2>
+      <ul>
+        <% event.time_slots.forEach(slot => { %>
+          <li><%= slot.start_time %> - <%= slot.end_time %></li>
+        <% }) %>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Respond to Event</h2>
+      <form id="response-form">
+        <input type="hidden" id="event-id" name="event-id" value="<%= event.id %>">
+        <label for="attendee-name">Your Name:</label>
+        <input type="text" id="attendee-name" name="attendee-name" required>
+
+        <fieldset>
+          <legend>Available Time Slots:</legend>
+          <% event.time_slots.forEach(slot => { %>
+            <label>
+              <input type="checkbox" name="time-slot" value="<%= slot.time_slot_id %>">
+              <%= slot.start_time %> - <%= slot.end_time %>
+            </label>
+          <% }) %>
+        </fieldset>
+
+        <button type="submit">Submit</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById('response-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const attendeeName = document.getElementById('attendee-name').value.trim();
+      const eventId = document.getElementById('event-id').value;
+      const timeSlots = Array.from(
+        document.querySelectorAll('input[name="time-slot"]:checked')
+      ).map((checkbox) => checkbox.value);
+
+      if (!attendeeName || timeSlots.length === 0) {
+        alert('Please provide your name and select at least one time slot.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/availability', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: attendeeName, timeSlots, event_id: eventId }),
+        });
+
+        if (response.ok) {
+          alert('Availability submitted successfully!');
+          document.getElementById('response-form').reset();
+        } else {
+          const errorText = await response.text();
+          console.error('Error submitting availability:', errorText);
+          alert('Failed to submit availability. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

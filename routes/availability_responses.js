@@ -2,22 +2,34 @@ const express = require("express");
 const db = require("../db/connection");
 const router = express.Router();
 
-// POST route to add a new availability response - POST /availability_responses
+// POST route to submit availability - POST /api/availability
 router.post("/", async (req, res) => {
-  const { attendee_id, time_slot_id, event_id } = req.body;
+  const { name, timeSlots, event_id } = req.body;
 
-  if (!attendee_id || !time_slot_id || !event_id) {
-    return res.status(400).json({ error: "All fields are required" });
+  if (!name || !Array.isArray(timeSlots) || timeSlots.length === 0 || !event_id) {
+    return res.status(400).json({ error: "Name, event ID, and at least one time slot are required." });
   }
 
   try {
-    const result = await db.query(
-      "INSERT INTO availability_responses (attendee_id, time_slot_id, event_id) VALUES ($1, $2, $3) RETURNING *",
-      [attendee_id, time_slot_id, event_id]
+    const attendeeResult = await db.query(
+      "INSERT INTO attendees (name) VALUES ($1) RETURNING attendee_id",
+      [name]
     );
-    res.status(201).json(result.rows[0]);
+
+    const attendeeId = attendeeResult.rows[0].attendee_id;
+
+    const availabilityPromises = timeSlots.map(async (timeSlotId) => {
+      return db.query(
+        "INSERT INTO availability_responses (attendee_id, time_slot_id, event_id) VALUES ($1, $2, $3)",
+        [attendeeId, timeSlotId, event_id]
+      );
+    });
+
+    await Promise.all(availabilityPromises);
+
+    res.status(201).json({ message: "Availability submitted successfully!" });
   } catch (error) {
-    console.error("Error creating availability response:", error);
+    console.error("Error submitting availability:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -33,14 +45,11 @@ router.get("/:id", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "Availability response not found." });
+      return res.status(404).json({ error: "Availability response not found." });
     }
 
     res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error("Error fetching availability response:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -51,9 +60,7 @@ router.put("/:id", async (req, res) => {
   const { attendee_id, time_slot_id, event_id } = req.body;
 
   if (!attendee_id || !time_slot_id || !event_id) {
-    return res.status(400).json({
-      error: "All fields are required",
-    });
+    return res.status(400).json({ error: "All fields are required" });
   }
 
   try {
@@ -65,14 +72,11 @@ router.put("/:id", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "Availability response not found." });
+      return res.status(404).json({ error: "Availability response not found." });
     }
 
     res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error("Error updating availability response:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -83,14 +87,11 @@ router.get("/", async (req, res) => {
     const result = await db.query("SELECT * FROM availability_responses");
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No availability responses found." });
+      return res.status(404).json({ error: "No availability responses found." });
     }
 
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("Error fetching availability responses:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -106,16 +107,11 @@ router.delete("/:id", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "Availability response not found." });
+      return res.status(404).json({ error: "Availability response not found." });
     }
 
-    res
-      .status(200)
-      .json({ message: "Availability response deleted successfully." });
+    res.status(200).json({ message: "Availability response deleted successfully." });
   } catch (error) {
-    console.error("Error deleting availability response:", error);
     res.status(500).json({ error: "Server error" });
   }
 });

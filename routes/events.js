@@ -46,7 +46,7 @@ router.post("/", async (req, res) => {
 
     res.status(201).json({
       ...newEvent,
-      uniqueUrl: `${req.protocol}://${req.get("host")}/events/${uniqueUrl}`,
+      uniqueUrl: `${req.protocol}://${req.get("host")}/events/${uniqueUrl}/respond`,
       time_slots: insertedTimeSlots,
     });
 
@@ -84,6 +84,40 @@ router.get("/:uniqueUrl", async (req, res) => {
     res.status(200).json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ error: "Unfortunate Server Error" });
+  }
+});
+
+// GET route to render event details and attendee response form - GET /events/:uniqueUrl/respond
+router.get("/:uniqueUrl/respond", async (req, res) => {
+  const { uniqueUrl } = req.params;
+
+  if (!uniqueUrl) {
+    return res.status(400).json({ error: "Unique URL is required." });
+  }
+
+  try {
+    const eventResult = await db.query(
+      "SELECT event_id AS id, event_name AS name, description FROM events WHERE unique_url = $1",
+      [uniqueUrl]
+    );
+
+    if (eventResult.rows.length === 0) {
+      return res.status(404).json({ error: "Sorry, event not found." });
+    }
+
+    const event = eventResult.rows[0];
+
+    const timeSlotsResult = await db.query(
+      "SELECT time_slot_id, start_time, end_time FROM time_slots WHERE event_id = $1",
+      [event.id]
+    );
+
+    event.time_slots = timeSlotsResult.rows;
+
+    res.render("event_details", { event });
+  } catch (error) {
+    console.error("Error fetching event details:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
