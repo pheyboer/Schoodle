@@ -36,14 +36,14 @@ db.query("SELECT NOW()")
     process.exit(1); 
   });
 
-
+// Import routes
 const userApiRoutes = require("./routes/users-api");
 const eventsApiRoutes = require("./routes/events"); 
 const timeSlotApiRoutes = require("./routes/time_slots"); 
 const attendeeRoutes = require("./routes/attendees"); 
 const availabilityResponseRoutes = require("./routes/availability_responses");
 
-
+// Mount routes
 app.use("/api/users", userApiRoutes); 
 app.use("/api/events", eventsApiRoutes); 
 app.use("/api/time_slots", timeSlotApiRoutes); 
@@ -54,10 +54,10 @@ console.log(
   "Routes connected: /api/events, /api/time_slots, /api/attendees, /api/availability_responses"
 );
 
-// Add Catch-All Fallback Route
-app.use((req, res) => {
-  console.warn(`Unhandled route: ${req.method} ${req.path}`);
-  res.status(404).json({ error: "Route not found." });
+// Route for favicon.ico requests
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end(); // Respond with no content
+  console.log("GET /favicon.ico - Handled successfully.");
 });
 
 // Home page route
@@ -78,9 +78,11 @@ app.get("/test-db", async (req, res) => {
   }
 });
 
-// route for favicon.ico requests
-app.get('/favicon.ico', (req, res) => res.status(204).end());
-
+// Add Catch-All Fallback Route for Unhandled Routes
+app.use((req, res) => {
+  console.warn(`Unhandled route: ${req.method} ${req.path}`);
+  res.status(404).json({ error: "Route not found." });
+});
 
 // Start the server
 app.listen(PORT, () => {
