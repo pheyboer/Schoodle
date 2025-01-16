@@ -30,12 +30,19 @@ router.post("/", async (req, res) => {
     );
 
     const newEvent = result.rows[0];
-    const event_id = newEvent.event_id; // Get the event_id of the newly created event
 
-    // Insert time slots for the event into the time_slots table
+    const event_id = newEvent.event_id;
+
+     // validate time slot
+     if (!Array.isArray(time_slots) || time_slots.some(slot => !slot.start_time || !slot.end_time)) {
+      console.error("POST /events - Invalid time_slots structure");
+      return res.status(400).json({ error: "Invalid time_slots format." });
+    }
+
+    // insert time slots for the event into the time_slots table
     const timeSlotPromises = time_slots.map(async (slot) => {
       const { start_time, end_time } = slot;
-      // Insert the time slot with the associated event_id
+
       const slotResult = await db.query(
         "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING time_slot_id, start_time, end_time",
         [event_id, start_time, end_time]
@@ -43,14 +50,18 @@ router.post("/", async (req, res) => {
       return slotResult.rows[0];
     });
 
-    // Wait for all time slots to be inserted
+
+    // wait for all time slots to be inserted
+
     const insertedTimeSlots = await Promise.all(timeSlotPromises);
 
     console.log("POST /events - Event Created Successfully:", newEvent);
     res.status(201).json({
       ...newEvent,
       uniqueUrl: `${req.protocol}://${req.get("host")}/events/${uniqueUrl}`,
-      time_slots: insertedTimeSlots, // Include the time slots with their time_slot_id
+
+      time_slots: insertedTimeSlots,
+
     });
   } catch (error) {
     console.error("POST /events - Error creating event:", error);
@@ -61,6 +72,11 @@ router.post("/", async (req, res) => {
 // GET route to fetch an event by its unique URL - GET /events/:uniqueUrl
 router.get("/:uniqueUrl", async (req, res) => {
   const { uniqueUrl } = req.params;
+
+  if (!uniqueUrl) {
+    console.error("GET /events/:uniqueUrl - Missing unique URL");
+    return res.status(400).json({ error: "Unique URL is required." });
+  }
 
   console.log("GET /events/:uniqueUrl - Unique URL:", uniqueUrl);
 
@@ -93,6 +109,11 @@ router.get("/:uniqueUrl", async (req, res) => {
 // GET route to fetch an event by ID - GET /events/:id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
+
+  if (!id) {
+    console.error("GET /events/:id - Missing event ID");
+    return res.status(400).json({ error: "Event ID is required." });
+  }
 
   // log incoming request
   console.log("GET /events/:id - Event ID:", id);
