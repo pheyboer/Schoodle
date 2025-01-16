@@ -28,19 +28,22 @@
     <!-- Event Creation Form -->
     <section id="create-event">
       <h2>Create an Event</h2>
-      <form id="event-form">
-        <label for="event-name">Event Name:</label>
+      <form action="/create-event" method="POST">
+        <label for="event_name">Event Name:</label>
+        <input type="text" id="event_name" name="event_name" required>
 
-        <input type="text" id="event-name" name="event-name" aria-label ="Event Name" required>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea>
 
-        <label for="event-description">Description:</label>
-        <textarea id="event-description" name="event-description" required></textarea>
+        <label for="organizer_name">Organizer Name:</label>
+        <input type="text" id="organizer_name" name="organizer_name" required>
 
-        <label for="event-time-slots">Time Slots (comma-separated):</label>
-        <input type="text" id="event-time-slots" name="event-time-slots" placeholder="e.g., 9-10am, 10-11am" required>
+        <label for="time_slot">Time Slot:</label>
+        <input type="text" id="time_slot" name="time_slot" required>
 
         <button type="submit">Create Event</button>
-      </form>
+    </form>
+
       <div id="success-message" style="display: none;">Event created successfully!</div>
     </section>
 
@@ -59,7 +62,7 @@
       <button id="fetch-users">Fetch Users</button>
       <ul id="users"></ul>
     </section>
-  
+
     <!-- Event Details part -->
     <section id="event-details" style="display: none;">
       <h2>Event Details</h2>
