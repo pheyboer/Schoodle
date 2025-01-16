@@ -13,7 +13,7 @@ router.post("/", async (req, res) => {
   const { event_name, description, organizer_name, organizer_email, time_slots } = req.body;
 
   // Input validation
-  if (!event_name || !description || !organizer_name || organizer_email || !time_slots) {
+  if (!event_name || !description || !organizer_name || !organizer_email || !time_slots) {
     console.error("POST /events - Missing fields:", req.body);
     return res
       .status(400)
@@ -66,7 +66,7 @@ router.get("/:uniqueUrl", async (req, res) => {
 
   try {
     const result = await db.query(
-      "SELECT event_id AS id, event_name AS name, description, time_slots AS timeSlots FROM events WHERE unique_url = $1",
+      "SELECT event_id AS id, event_name AS name, description FROM events WHERE unique_url = $1",
       [uniqueUrl]
     );
 
@@ -74,6 +74,14 @@ router.get("/:uniqueUrl", async (req, res) => {
       console.error("GET /events/:uniqueUrl - Event Not Found:", uniqueUrl);
       return res.status(404).json({ error: "Sorry, event not found." });
     }
+
+    const timeSlotsResult = await db.query(
+      "SELECT time_slot_id, start_time, end_time FROM time_slots WHERE event_id = $1",
+      [result.rows[0].id]
+    );
+
+    result.rows[0].time_slots = timeSlotsResult.rows;
+
     console.log("GET /events/:uniqueUrl - Event Fetched Successfully:", result.rows[0]);
     res.status(200).json(result.rows[0]);
   } catch (error) {
@@ -91,7 +99,7 @@ router.get("/:id", async (req, res) => {
 
   try {
     const result = await db.query(
-      "SELECT event_id AS id, event_name AS name, description, time_slots AS timeSlots FROM events WHERE event_id = $1",
+      "SELECT event_id AS id, event_name AS name, description FROM events WHERE event_id = $1",
       [id]
     );
 
@@ -99,6 +107,14 @@ router.get("/:id", async (req, res) => {
       console.error("GET /events/:id - Event Not Found:", id);
       return res.status(404).json({ error: "Sorry, event not found." });
     }
+
+    const timeSlotsResult = await db.query(
+      "SELECT time_slot_id, start_time, end_time FROM time_slots WHERE event_id = $1",
+      [id]
+    );
+
+    result.rows[0].time_slots = timeSlotsResult.rows;
+
     console.log(
       "GET /events/:id - Event Fetched Successfully:",
       result.rows[0]
@@ -132,17 +148,18 @@ router.get("/", async (req, res) => {
   }
 });
 
-// PUT route for updating event details
+// PUT route for updating event details - PUT /events/:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { event_name, description, time_slots } = req.body;
 
-  // log incoming request and body
   console.log("PUT /events/:id - Event ID:", id);
   console.log("PUT /events/:id - Request Body:", req.body);
 
   // Input validation
+
   if (!event_name || !description || !time_slots) {
+
     console.error("PUT /events/:id - Missing fields:", req.body);
     return res
       .status(400)
@@ -150,7 +167,9 @@ router.put("/:id", async (req, res) => {
   }
 
   try {
+
     // updating event details
+
     const result = await db.query(
       "UPDATE events SET event_name = $1, description = $2 WHERE event_id = $3 RETURNING *",
       [event_name, description, id]
@@ -184,9 +203,10 @@ router.put("/:id", async (req, res) => {
       result.rows[0]
     );
     res.status(200).json(result.rows[0]);
+
   } catch (error) {
     console.error("PUT /events/:id - Error updating event:", error);
-    res.status(500).json({ error: "There has been a server error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
