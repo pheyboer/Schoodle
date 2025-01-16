@@ -61,7 +61,7 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
-// connection test
+// database connection test
 app.get("/test-db", async (req, res) => {
   try {
     const testQuery = await db.query("SELECT NOW()");
