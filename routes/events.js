@@ -55,6 +55,7 @@ router.post("/", async (req, res) => {
     res.status(201).json({
       ...newEvent,
       uniqueUrl: `${req.protocol}://${req.get("host")}/events/${uniqueUrl}`,
+      time_slots: insertedTimeSlots,
     });
   } catch (error) {
     console.error("POST /events - Error creating event:", error);
@@ -65,6 +66,11 @@ router.post("/", async (req, res) => {
 // GET route to fetch an event by its unique URL - GET /events/:uniqueUrl
 router.get("/:uniqueUrl", async (req, res) => {
   const { uniqueUrl } = req.params;
+
+  if (!uniqueUrl) {
+    console.error("GET /events/:uniqueUrl - Missing unique URL");
+    return res.status(400).json({ error: "Unique URL is required." });
+  }
 
   console.log("GET /events/:uniqueUrl - Unique URL:", uniqueUrl);
 
