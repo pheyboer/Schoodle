@@ -40,6 +40,7 @@ const availabilityResponseRoutes = require("./routes/availability_responses"); /
 app.use("/api/users", userApiRoutes);
 app.use("/api/widgets", widgetApiRoutes);
 app.use("/users", usersRoutes);
+app.use("/events", eventsApiRoutes);
 app.use("/time_slots", timeSlotApiRoutes);
 app.use("/attendees", attendeeRoutes);
 app.use("/availability_responses", availabilityResponseRoutes);
@@ -67,19 +68,11 @@ process.on("uncaughtException", (err) => {
   process.exit(1); // Exit the process after cleanup
 });
 
-// Establish database connection
-db.connect((err) => {
-  if (err) {
-    console.error("Database connection failed:", err.message);
-    process.exit(1); // Exit if the database can't connect
-  } else {
-    console.log("Database connected successfully");
-
-    // Start the server only after successful database connection
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    }).on("error", (err) => {
-      console.error(`Failed to start server: ${err.message}`);
-    });
-  }
+// Export app for testing
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+}).on("error", (err) => {
+  console.error(`Failed to start server: ${err.message}`);
 });
+
+module.exports = { app, server };
