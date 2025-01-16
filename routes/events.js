@@ -209,4 +209,52 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// DELETE route for deleting an event - DELETE /events/:id
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Start a transaction to ensure all related data is deleted
+    await db.query('BEGIN');
+
+    // Delete related availability responses first
+    await db.query(
+      "DELETE FROM availability_responses WHERE event_id = $1",
+      [id]
+    );
+
+    // Delete related time slots
+    await db.query(
+      "DELETE FROM time_slots WHERE event_id = $1",
+      [id]
+    );
+
+    // Delete attendees
+    await db.query(
+      "DELETE FROM attendees WHERE event_id = $1",
+      [id]
+    );
+
+    // Finally, delete the event
+    const result = await db.query(
+      "DELETE FROM events WHERE event_id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    // Commit the transaction
+    await db.query('COMMIT');
+
+    res.status(200).json({ message: "Event and all related data deleted successfully" });
+  } catch (error) {
+    await db.query('ROLLBACK');
+    console.error("Error deleting event:", error);
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+});
+
 module.exports = router;

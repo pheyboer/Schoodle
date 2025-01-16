@@ -2,8 +2,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('event-form');
   const successMessage = document.getElementById('success-message');
-  const attendeeForm = document.getElementById('availability-form');
-  const attendeesList = document.getElementById('attendees-list');
 
   successMessage.style.display = 'none';
 
@@ -91,11 +89,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const newEvent = await response.json();
         renderEvent(newEvent);
 
+        // Store the latest event in sessionStorage for event details tab
+        sessionStorage.setItem('latestEvent', JSON.stringify(newEvent));
+
+        // Stay on current page and show success message
         successMessage.style.display = 'block';
         successMessage.textContent = 'Event created successfully!';
         form.reset();
 
-        // Display the unique URL
+        // Display the unique URL without switching tabs
         const uniqueUrlSection = document.getElementById('unique-url-section');
         const eventUrl = document.getElementById('event-url');
         eventUrl.innerHTML = `<a href="${newEvent.uniqueUrl}" target="_blank">${newEvent.uniqueUrl}</a>`;
@@ -180,45 +182,151 @@ fetchAndDisplayEvents();
     }
   };
 
-  // Attendee Form Submission
-  attendeeForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
+  // Add event listener for the Event Details nav link
+  document.querySelector('a[href="#event-details"]').addEventListener('click', function(e) {
+    e.preventDefault();
 
-    const attendeeName = document.getElementById('attendee-name').value.trim();
-    const attendeeEmail = document.getElementById('attendee-email').value.trim(); // Add email field
-    const eventId = document.getElementById('event-id').value;
-    const timeSlots = Array.from(
-      document.querySelectorAll('input[name="time-slot"]:checked')
-    ).map((checkbox) => checkbox.value);
+    // Get the latest event from sessionStorage
+    const latestEvent = JSON.parse(sessionStorage.getItem('latestEvent'));
+    console.log('Latest event data:', latestEvent); // Debug log
 
-    if (!attendeeName || !attendeeEmail || timeSlots.length === 0) {
-      alert('Please provide your name, email, and select at least one time slot.');
-      return;
+    if (latestEvent) {
+      // Clear previous content
+      document.getElementById('time-slots-display').innerHTML = '<h4>Available Time Slots</h4>';
+
+      // Update Event Details section with all event information
+      document.getElementById('event-name-display').textContent = latestEvent.event_name;
+      document.getElementById('event-description-display').textContent = latestEvent.description;
+      document.getElementById('organizer-name-display').textContent = latestEvent.organizer_name;
+      document.getElementById('organizer-email-display').textContent = latestEvent.organizer_email;
+
+      // Display time slots if they exist
+      if (latestEvent.time_slots && latestEvent.time_slots.length > 0) {
+        const timeSlotsList = document.createElement('ul');
+        latestEvent.time_slots.forEach(slot => {
+          const li = document.createElement('li');
+          const timeText = document.createElement('span');
+          const start = new Date(slot.start_time).toLocaleString();
+          const end = new Date(slot.end_time).toLocaleString();
+          timeText.textContent = `${start} - ${end}`;
+
+          const actionButtons = document.createElement('div');
+          actionButtons.className = 'time-slot-actions';
+          actionButtons.innerHTML = `
+            <button onclick="editTimeSlot(${slot.time_slot_id})" class="edit-button">Edit</button>
+            <button onclick="deleteTimeSlot(${slot.time_slot_id})" class="delete-button">Delete</button>
+          `;
+
+          li.appendChild(timeText);
+          li.appendChild(actionButtons);
+          timeSlotsList.appendChild(li);
+        });
+        document.getElementById('time-slots-display').appendChild(timeSlotsList);
+      }
+
+      // Display share URL
+      document.getElementById('unique-url-display').innerHTML =
+        `<h4>Share Event</h4><p>Share this URL with your attendees: <a href="${latestEvent.uniqueUrl}" target="_blank">${latestEvent.uniqueUrl}</a></p>`;
+    } else {
+      console.log('No event data found in sessionStorage');
     }
 
+    // Show the event details section
+    document.querySelectorAll('main > section').forEach(section => {
+      section.style.display = 'none';
+    });
+    document.getElementById('event-details').style.display = 'block';
+  });
+
+});
+
+// Add these functions after the existing code
+function editEvent() {
+  const latestEvent = JSON.parse(sessionStorage.getItem('latestEvent'));
+  if (!latestEvent) return;
+
+  // Populate form with current values
+  document.getElementById('event-name').value = latestEvent.event_name;
+  document.getElementById('event-description').value = latestEvent.description;
+  document.getElementById('organizer_name').value = latestEvent.organizer_name;
+  document.getElementById('organizer_email').value = latestEvent.organizer_email;
+
+  // Switch to create event section
+  document.querySelectorAll('main > section').forEach(section => {
+    section.style.display = 'none';
+  });
+  document.getElementById('create-event').style.display = 'block';
+
+  // Change form submission behavior for update
+  const form = document.getElementById('event-form');
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    await updateEvent(latestEvent.event_id);
+  };
+}
+
+async function updateEvent(eventId) {
+  try {
+    const response = await fetch(`/events/${eventId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_name: document.getElementById('event-name').value,
+        description: document.getElementById('event-description').value,
+        organizer_name: document.getElementById('organizer_name').value,
+        organizer_email: document.getElementById('organizer_email').value,
+        time_slots: Array.from(document.querySelectorAll('.time-slot-entry')).map(slot => ({
+          start_time: slot.querySelector('input[name="start_time[]"]').value,
+          end_time: slot.querySelector('input[name="end_time[]"]').value
+        }))
+      })
+    });
+
+    if (response.ok) {
+      alert('Event updated successfully!');
+      location.reload();
+    } else {
+      alert('Failed to update event');
+    }
+  } catch (error) {
+    console.error('Error updating event:', error);
+    alert('Error updating event');
+  }
+}
+
+async function deleteEvent() {
+  const latestEvent = JSON.parse(sessionStorage.getItem('latestEvent'));
+  if (!latestEvent || !latestEvent.event_id) {
+    alert('No event selected to delete');
+    return;
+  }
+
+  if (confirm('Are you sure you want to delete this event? This will also delete all related time slots and responses.')) {
     try {
-      const response = await fetch('/availability_responses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: attendeeName,
-          email: attendeeEmail, // Include email in the request
-          timeSlots: timeSlots,
-          event_id: eventId
-        }),
+      const response = await fetch(`/events/${latestEvent.event_id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       if (response.ok) {
-        alert('Availability submitted successfully!');
-        attendeeForm.reset();
+        alert('Event deleted successfully!');
+        sessionStorage.removeItem('latestEvent');
+        // Redirect to create event page
+        document.querySelectorAll('main > section').forEach(section => {
+          section.style.display = 'none';
+        });
+        document.getElementById('create-event').style.display = 'block';
+        // Refresh the events list
+        fetchAndDisplayEvents();
       } else {
-        const errorText = await response.text();
-        console.error('Error submitting availability:', errorText);
-        alert('Failed to submit availability. Please try again.');
+        const errorData = await response.json();
+        alert(`Failed to delete event: ${errorData.error}`);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again.');
+      console.error('Error deleting event:', error);
+      alert('Error deleting event. Please try again.');
     }
-  });
-});
+  }
+}

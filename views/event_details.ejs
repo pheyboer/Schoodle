@@ -27,23 +27,33 @@
       <form id="response-form">
         <input type="hidden" id="event-id" name="event-id" value="<%= event.id %>">
 
-        <label for="attendee-name">Your Name:</label>
-        <input type="text" id="attendee-name" name="attendee-name" required>
+        <div class="form-group">
+          <label for="attendee-name">Your Name:</label>
+          <input type="text" id="attendee-name" name="attendee-name" required>
+        </div>
 
-        <label for="attendee-email">Your Email:</label>
-        <input type="email" id="attendee-email" name="attendee-email" required>
+        <div class="form-group">
+          <label for="attendee-email">Your Email:</label>
+          <input type="email" id="attendee-email" name="attendee-email" required>
+        </div>
 
-        <fieldset>
-          <legend>Available Time Slots:</legend>
+        <div class="time-slots-container">
+          <h4>Available Time Slots:</h4>
           <% event.time_slots.forEach(slot => { %>
-            <label>
-              <input type="checkbox" name="time-slot" value="<%= slot.time_slot_id %>">
-              <%= slot.start_time %> - <%= slot.end_time %>
-            </label>
+            <div class="time-slot-option">
+              <label>
+                <input type="checkbox" name="time-slot" value="<%= slot.time_slot_id %>">
+                <%= new Date(slot.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %> -
+                <%= new Date(slot.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+              </label>
+            </div>
           <% }) %>
-        </fieldset>
+        </div>
 
-        <button type="submit">Submit</button>
+        <div class="form-buttons">
+          <button type="submit" class="submit-button">Submit Availability</button>
+          <button type="button" class="cancel-button" onclick="window.history.back()">Cancel</button>
+        </div>
       </form>
     </section>
   </main>
