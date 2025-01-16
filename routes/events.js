@@ -107,6 +107,23 @@ router.get("/:uniqueUrl", async (req, res) => {
   }
 });
 
+// GET route for api events
+router.get("/", async (req, res) => {
+  console.log("GET /api/events - Fetching all events");
+  try {
+    const result = await db.query("SELECT * FROM events");
+    if (result.rows.length === 0) {
+      console.error("GET /api/events - No events found");
+      return res.status(404).json({ error: "No events found." });
+    }
+    console.log("GET /api/events - Events Fetched Successfully:", result.rows);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("GET /api/events - Error fetching events:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+});
+
 // GET route to fetch an event by ID - GET /events/:id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
