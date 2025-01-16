@@ -31,6 +31,7 @@ header h1 {
   margin-bottom: 10px;
 }
 
+/* Navigation Menu Styling */
 nav ul {
   list-style: none;
   display: flex;
@@ -52,7 +53,7 @@ nav ul li a:hover {
   text-decoration: underline;
 }
 
-/* Main Content */
+/* Main Content Section Styling */
 main {
   flex: 1;
   padding: 20px;
@@ -60,11 +61,12 @@ main {
   margin: 0 auto;
 }
 
-/* Section Styles */
+/* Section-Specific Styling */
 section {
   margin-bottom: 30px;
 }
 
+/* Section Headers Styling */
 h2 {
   font-size: 2rem;
   margin-bottom: 15px;
@@ -72,6 +74,7 @@ h2 {
   text-align: center;
 }
 
+/* Form Styling */
 form {
   background-color: #fff;
   border-radius: 8px;
@@ -102,6 +105,7 @@ textarea {
   resize: vertical;
 }
 
+/* Button Styling */
 button {
   background-color: #4CAF50;
   color: white;
@@ -117,7 +121,7 @@ button:hover {
   background-color: #45a049;
 }
 
-/* Success Message */
+/* Success Message Styling */
 #success-message {
   text-align: center;
   font-size: 1.2rem;
@@ -125,7 +129,7 @@ button:hover {
   margin-top: 20px;
 }
 
-/* Event Details */
+/* Event Details Section Styling */
 #event-info {
   background-color: #fff;
   padding: 20px;
@@ -133,6 +137,7 @@ button:hover {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* List Styling */
 ul {
   list-style: none;
   padding: 0;
@@ -142,7 +147,7 @@ ul li {
   margin-bottom: 10px;
 }
 
-/* Attendee Form */
+/* Attendee Form Styling */
 fieldset {
   border: none;
   padding: 0;
