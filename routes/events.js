@@ -89,7 +89,9 @@ router.get("/:uniqueUrl", async (req, res) => {
       "SELECT time_slot_id, start_time, end_time FROM time_slots WHERE event_id = $1",
       [result.rows[0].id]
     );
-    
+
+    result.rows[0].time_slots = timeSlotsResult.rows;
+
     console.log("GET /events/:uniqueUrl - Event Fetched Successfully:", result.rows[0]);
     res.status(200).json(result.rows[0]);
   } catch (error) {
@@ -101,6 +103,11 @@ router.get("/:uniqueUrl", async (req, res) => {
 // GET route to fetch an event by ID - GET /events/:id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
+
+  if (!id) {
+    console.error("GET /events/:id - Missing event ID");
+    return res.status(400).json({ error: "Event ID is required." });
+  }
 
   // log incoming request
   console.log("GET /events/:id - Event ID:", id);
