@@ -185,21 +185,27 @@ fetchAndDisplayEvents();
     event.preventDefault();
 
     const attendeeName = document.getElementById('attendee-name').value.trim();
+    const attendeeEmail = document.getElementById('attendee-email').value.trim(); // Add email field
     const eventId = document.getElementById('event-id').value;
     const timeSlots = Array.from(
       document.querySelectorAll('input[name="time-slot"]:checked')
     ).map((checkbox) => checkbox.value);
 
-    if (!attendeeName || timeSlots.length === 0) {
-      alert('Please provide your name and select at least one time slot.');
+    if (!attendeeName || !attendeeEmail || timeSlots.length === 0) {
+      alert('Please provide your name, email, and select at least one time slot.');
       return;
     }
 
     try {
-      const response = await fetch('/api/availability', {
+      const response = await fetch('/availability_responses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: attendeeName, timeSlots, event_id: eventId }),
+        body: JSON.stringify({
+          name: attendeeName,
+          email: attendeeEmail, // Include email in the request
+          timeSlots: timeSlots,
+          event_id: eventId
+        }),
       });
 
       if (response.ok) {
