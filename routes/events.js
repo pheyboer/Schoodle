@@ -151,13 +151,15 @@ router.get("/", async (req, res) => {
 // PUT route for updating event details - PUT /events/:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { event_name, description, timeSlots } = req.body;  // Use event_name here
+  const { event_name, description, time_slots } = req.body;
 
   console.log("PUT /events/:id - Event ID:", id);
   console.log("PUT /events/:id - Request Body:", req.body);
 
   // Input validation
-  if (!event_name || !description || !timeSlots) {
+
+  if (!event_name || !description || !time_slots) {
+
     console.error("PUT /events/:id - Missing fields:", req.body);
     return res
       .status(400)
@@ -165,7 +167,9 @@ router.put("/:id", async (req, res) => {
   }
 
   try {
-    // First, update the event details (using event_name instead of name)
+
+    // updating event details
+
     const result = await db.query(
       "UPDATE events SET event_name = $1, description = $2 WHERE event_id = $3 RETURNING *",
       [event_name, description, id]
@@ -176,27 +180,30 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ error: "Event not found." });
     }
 
-    // Delete existing time slots for this event from the time_slots table
-    await db.query("DELETE FROM time_slots WHERE event_id = $1", [id]);
+    // Update time slots for the event
+    // Delete the existing time slots
+    const deleteSlotsResult = await db.query(
+      "DELETE FROM time_slots WHERE event_id = $1",
+      [id]
+    );
 
-    // Insert new time slots into the time_slots table
-    const timeSlotPromises = timeSlots.map(async (slot) => {
+    // Insert the new time slots
+    const timeSlotPromises = time_slots.map(async (slot) => {
       const { start_time, end_time } = slot;
-      const slotResult = await db.query(
+      return db.query(
         "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING time_slot_id, start_time, end_time",
         [id, start_time, end_time]
       );
-      return slotResult.rows[0];
     });
 
-    // Wait for all time slots to be inserted
-    const insertedTimeSlots = await Promise.all(timeSlotPromises);
+    await Promise.all(timeSlotPromises);
 
-    console.log("PUT /events/:id - Event and Time Slots Updated Successfully:", result.rows[0]);
-    res.status(200).json({
-      ...result.rows[0],
-      time_slots: insertedTimeSlots, // Include updated time slots
-    });
+    console.log(
+      "PUT /events/:id - Event Updated Successfully:",
+      result.rows[0]
+    );
+    res.status(200).json(result.rows[0]);
+
   } catch (error) {
     console.error("PUT /events/:id - Error updating event:", error);
     res.status(500).json({ error: "Internal Server Error" });
