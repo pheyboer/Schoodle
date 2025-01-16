@@ -10,10 +10,10 @@ function generateUniqueId() {
 
 // Post route for creating a new event - POST /events
 router.post("/", async (req, res) => {
-  const { name, description, timeSlots } = req.body;
+  const { event_name, description, organizer_name, organizer_email, time_slots } = req.body;
 
   // Input validation
-  if (!name || !description || !timeSlots) {
+  if (!event_name || !description || !organizer_name || !organizer_email || !time_slots) {
     console.error("POST /events - Missing fields:", req.body);
     return res
       .status(400)
@@ -25,11 +25,12 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await db.query(
-      "INSERT INTO events (event_name, description, time_slots, unique_url) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, description, timeSlots, uniqueUrl]
+      "INSERT INTO events (event_name, description, organizer_name, organizer_email, unique_url) VALUES ($1, $2, $3, $4, $5) RETURNING event_id",
+      [event_name, description, organizer_name, organizer_email, uniqueUrl]
     );
 
     const newEvent = result.rows[0];
+
     const event_id = newEvent.event_id;
 
      // validate time slot
@@ -41,6 +42,7 @@ router.post("/", async (req, res) => {
     // insert time slots for the event into the time_slots table
     const timeSlotPromises = time_slots.map(async (slot) => {
       const { start_time, end_time } = slot;
+
       const slotResult = await db.query(
         "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING time_slot_id, start_time, end_time",
         [event_id, start_time, end_time]
@@ -48,14 +50,18 @@ router.post("/", async (req, res) => {
       return slotResult.rows[0];
     });
 
+
     // wait for all time slots to be inserted
+
     const insertedTimeSlots = await Promise.all(timeSlotPromises);
 
     console.log("POST /events - Event Created Successfully:", newEvent);
     res.status(201).json({
       ...newEvent,
       uniqueUrl: `${req.protocol}://${req.get("host")}/events/${uniqueUrl}`,
+
       time_slots: insertedTimeSlots,
+
     });
   } catch (error) {
     console.error("POST /events - Error creating event:", error);
@@ -76,7 +82,7 @@ router.get("/:uniqueUrl", async (req, res) => {
 
   try {
     const result = await db.query(
-      "SELECT event_id AS id, event_name AS name, description, time_slots AS timeSlots FROM events WHERE unique_url = $1",
+      "SELECT event_id AS id, event_name AS name, description FROM events WHERE unique_url = $1",
       [uniqueUrl]
     );
 
@@ -114,7 +120,7 @@ router.get("/:id", async (req, res) => {
 
   try {
     const result = await db.query(
-      "SELECT event_id AS id, event_name AS name, description, time_slots AS timeSlots FROM events WHERE event_id = $1",
+      "SELECT event_id AS id, event_name AS name, description FROM events WHERE event_id = $1",
       [id]
     );
 
@@ -163,17 +169,18 @@ router.get("/", async (req, res) => {
   }
 });
 
-// PUT route for updating event details
+// PUT route for updating event details - PUT /events/:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { name, description, timeSlots } = req.body;
+  const { event_name, description, time_slots } = req.body;
 
-  // log incoming request and body
   console.log("PUT /events/:id - Event ID:", id);
   console.log("PUT /events/:id - Request Body:", req.body);
 
   // Input validation
-  if (!name || !description || !timeSlots) {
+
+  if (!event_name || !description || !time_slots) {
+
     console.error("PUT /events/:id - Missing fields:", req.body);
     return res
       .status(400)
@@ -181,9 +188,12 @@ router.put("/:id", async (req, res) => {
   }
 
   try {
+
+    // updating event details
+
     const result = await db.query(
-      "UPDATE events SET event_name = $1, description = $2, time_slots = $3 WHERE event_id = $4 RETURNING *",
-      [name, description, timeSlots, id]
+      "UPDATE events SET event_name = $1, description = $2 WHERE event_id = $3 RETURNING *",
+      [event_name, description, id]
     );
 
     if (result.rows.length === 0) {
@@ -191,14 +201,33 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ error: "Event not found." });
     }
 
+    // Update time slots for the event
+    // Delete the existing time slots
+    const deleteSlotsResult = await db.query(
+      "DELETE FROM time_slots WHERE event_id = $1",
+      [id]
+    );
+
+    // Insert the new time slots
+    const timeSlotPromises = time_slots.map(async (slot) => {
+      const { start_time, end_time } = slot;
+      return db.query(
+        "INSERT INTO time_slots (event_id, start_time, end_time) VALUES ($1, $2, $3) RETURNING time_slot_id, start_time, end_time",
+        [id, start_time, end_time]
+      );
+    });
+
+    await Promise.all(timeSlotPromises);
+
     console.log(
       "PUT /events/:id - Event Updated Successfully:",
       result.rows[0]
     );
     res.status(200).json(result.rows[0]);
+
   } catch (error) {
     console.error("PUT /events/:id - Error updating event:", error);
-    res.status(500).json({ error: "There has been a server error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
