@@ -1,4 +1,4 @@
-// load .env data into process.env
+// Load .env data into process.env
 require("dotenv").config();
 
 // Web server config
@@ -14,7 +14,6 @@ app.set("view engine", "ejs");
 
 // Load the logger first so all (static) HTTP requests are logged to STDOUT
 // 'dev' = Concise output colored by response status for development use.
-//         The :status token will be colored red for server error codes, yellow for client error codes, cyan for redirection codes, and uncolored for all other codes.
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -29,7 +28,6 @@ app.use(
 app.use(express.static("public"));
 
 // Separated Routes for each Resource
-// Note: Feel free to replace the example routes below with your own
 const userApiRoutes = require("./routes/users-api");
 const widgetApiRoutes = require("./routes/widgets-api");
 const usersRoutes = require("./routes/users");
@@ -39,25 +37,42 @@ const attendeeRoutes = require("./routes/attendees"); // Attendee API route
 const availabilityResponseRoutes = require("./routes/availability_responses"); // Availability response API
 
 // Mount all resource routes
-// Note: Feel free to replace the example routes below with your own
-// Note: Endpoints that return data (eg. JSON) usually start with `/api`
 app.use("/api/users", userApiRoutes);
 app.use("/api/widgets", widgetApiRoutes);
 app.use("/users", usersRoutes);
-// Note: mount other resources here, using the same pattern above
-app.use("/time_slots", timeSlotApiRoutes);
 app.use("/events", eventsApiRoutes);
+app.use("/time_slots", timeSlotApiRoutes);
 app.use("/attendees", attendeeRoutes);
 app.use("/availability_responses", availabilityResponseRoutes);
 
-// Home page
-// Warning: avoid creating more routes in this file!
-// Separate them into separate routes files (see above).
-
-app.get("/", (req, res) => {
-  res.render("index");
+// Error-handling middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message || "Internal Server Error",
+    },
+  });
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`);
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection:", reason);
+  // Optionally, exit the process
+  // process.exit(1);
 });
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1); // Exit the process after cleanup
+});
+
+// Export app for testing
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+}).on("error", (err) => {
+  console.error(`Failed to start server: ${err.message}`);
+});
+
+module.exports = { app, server };
