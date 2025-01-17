@@ -5,6 +5,7 @@ const moment = require('moment'); // Time formatting
 
 // Installed moment.js to format time - Helper Function
 function formatTime(date) {
+
   if (!moment(date, moment.ISO_8601, true).isValid()) {
     console.warn("Invalid date provided:", date);
     return "Invalid date";
@@ -12,7 +13,7 @@ function formatTime(date) {
   return moment(date).format("h:mm A");
 }
 
-// POST route  for creating a new time slot for an event /time_slots
+// POST route for creating a new time slot for an event - POST /time_slots
 router.post("/", async (req, res) => {
   const { event_id, start_time, end_time } = req.body;
 
@@ -62,7 +63,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// GET route for fetching time slots for event /time_slots/:eventId
+// GET route for fetching time slots for event - GET /time_slots/event/:eventId
 router.get("/event/:eventId", async (req, res) => {
   const { eventId } = req.params;
 
@@ -121,7 +122,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE route to delete time slot by ID
+// DELETE route to delete time slot by ID - DELETE /time_slots/:id
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 

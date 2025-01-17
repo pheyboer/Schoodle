@@ -6,5 +6,5 @@ CREATE TABLE events (
     description TEXT NOT NULL,
     organizer_name VARCHAR(255) NOT NULL,
     organizer_email VARCHAR(255) NOT NULL,
-    unique_url TEXT UNIQUE
+    unique_url VARCHAR(255) NOT NULL UNIQUE
 );
