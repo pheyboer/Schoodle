@@ -5,7 +5,12 @@ const moment = require('moment'); // Time formatting
 
 // Installed moment.js to format time - Helper Function
 function formatTime(date) {
-  return moment(date).format('h:mm A');
+
+  if (!moment(date, moment.ISO_8601, true).isValid()) {
+    console.warn("Invalid date provided:", date);
+    return "Invalid date";
+  }
+  return moment(date).format("h:mm A");
 }
 
 // POST route for creating a new time slot for an event - POST /time_slots
